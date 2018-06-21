@@ -68,6 +68,27 @@ typedef struct
     float movement_fast;
 } SleepData;
 
+typedef struct
+{
+    uint32_t frame_counter;
+    uint32_t sensor_state;
+    float respiration_rate;
+    float respiration_distance;
+    float respiration_confidence;
+    float heart_rate;
+    float heart_distance;
+    float heart_confidence;
+    float normalized_movement_slow;
+    float normalized_movement_fast;
+    float normalized_movement_start;
+    float normalized_movement_end;
+} VitalSignsData;
+
+typedef struct
+{
+    uint32_t frame_counter;
+    uint32_t sleepstage;
+} SleepStageData;
 
 typedef struct
 {
@@ -144,6 +165,50 @@ typedef struct
     float * detection_velocity_items;
 } RespirationDetectionListData;
 
+typedef struct
+{
+    uint32_t frame_counter;
+    float start;
+    float bin_length;
+    uint32_t count;
+    float * normalized_movement_slow_items;
+    float * normalized_movement_fast_items;
+} RespirationNormalizedMovementListData;
+
+typedef struct
+{
+    uint32_t frame_counter;
+    uint32_t matrix_counter;
+    uint32_t range_idx;
+    uint32_t range_bins;
+    uint32_t frequency_count;
+    uint32_t pulsedoppler_instance;
+    float fps;
+    float fps_decimated;
+    float frequency_start;
+    float frequency_step;
+    float range;
+    const float * data;
+} PulseDopplerFloatData;
+
+typedef struct
+{
+    uint32_t frame_counter;
+    uint32_t matrix_counter;
+    uint32_t range_idx;
+    uint32_t range_bins;
+    uint32_t frequency_count;
+    uint32_t pulsedoppler_instance;
+    float byte_step_start;
+    float byte_step_size;
+    float fps;
+    float fps_decimated;
+    float frequency_start;
+    float frequency_step;
+    float range;
+    const uint8_t * data;
+} PulseDopplerByteData;
+
 
 typedef void (*McpPongCallback)(uint32_t pong, void * user_data);
 typedef void (*McpErrorCallback)(uint32_t data, void * user_data);
@@ -152,6 +217,8 @@ typedef void (*McpAckCallback)(Ack data, void * user_data);
 typedef void (*McpReplyCallback)(Reply data, void * user_data);
 typedef void (*McpRespirationDataCallback)(RespirationData data, void * user_data);
 typedef void (*McpSleepDataCallback)(SleepData data, void * user_data);
+typedef void (*McpVitalSignsDataCallback)(VitalSignsData data, void * user_data);
+typedef void (*McpSleepStageDataCallback)(SleepStageData data, void * user_data);
 typedef void (*McpBasebandApDataCallback)(BasebandApData data, void * user_data);
 typedef void (*McpBasebandIqDataCallback)(BasebandIqData data, void * user_data);
 typedef void (*McpPresenceSingleCallback)(PresenceSingleData data, void * user_data);
@@ -159,6 +226,9 @@ typedef void (*McpPresenceMovingListCallback)(PresenceMovingListData data, void 
 typedef void (*McpSystemStatusCallback)(SystemStatus ss, void * user_data);
 typedef void (*McpRespirationMovingListCallback)(RespirationMovingListData data, void * user_data);
 typedef void (*McpRespirationDetectionListCallback)(RespirationDetectionListData data, void * user_data);
+typedef void (*McpRespirationNormalizedMovementListCallback)(RespirationNormalizedMovementListData data, void * user_data);
+typedef void (*McpPulseDopplerFloatCallback)(PulseDopplerFloatData data, void * user_data);
+typedef void (*McpPulseDopplerByteCallback)(PulseDopplerByteData data, void * user_data);
 
 
 typedef struct
@@ -170,6 +240,8 @@ typedef struct
     McpReplyCallback reply;
     McpRespirationDataCallback respiration;
     McpSleepDataCallback sleep;
+    McpVitalSignsDataCallback vitalsigns;
+    McpSleepStageDataCallback sleepstage;
     McpBasebandApDataCallback baseband_ap;
     McpBasebandIqDataCallback baseband_iq;
     McpPresenceSingleCallback presence_single;
@@ -177,6 +249,9 @@ typedef struct
     McpSystemStatusCallback system_status;
     McpRespirationMovingListCallback respiration_movinglist;
     McpRespirationDetectionListCallback respiration_detectionlist;
+    McpRespirationNormalizedMovementListCallback respiration_normalizedmovementlist;
+    McpPulseDopplerFloatCallback pulsedoppler_float;
+    McpPulseDopplerByteCallback pulsedoppler_byte;
 } HostParser;
 
 
@@ -223,7 +298,16 @@ int parse_sleep_status(
     const unsigned char * data,
     unsigned int length,
     void * user_data);
-
+int parse_vitalsigns_status(
+    HostParser * parser,
+    const unsigned char * data,
+    unsigned int length,
+    void * user_data);
+int parse_sleepstage_status(
+    HostParser * parser,
+    const unsigned char * data,
+    unsigned int length,
+    void * user_data);    
 int parse_data_float(
     HostParser * p,
     const unsigned char * data,
@@ -284,7 +368,23 @@ int parse_respiration_detectionlist(
     unsigned int length,
     void * user_data);
 
+int parse_respiration_normalizedmovementlist(
+    HostParser * parser,
+    const unsigned char * data,
+    unsigned int length,
+    void * user_data);
 
+int parse_pulsedoppler_float(
+    HostParser * parser,
+    const unsigned char * data,
+    unsigned int length,
+    void * user_data);
+
+int parse_pulsedoppler_byte(
+    HostParser * parser,
+    const unsigned char * data,
+    unsigned int length,
+    void * user_data);
 
 
 #ifdef __cplusplus

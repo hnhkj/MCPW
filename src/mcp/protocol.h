@@ -60,6 +60,10 @@ int createSetSensorModeCommand(
     AppendCallback callback,
     void * user_data);
 
+int createGetSensorModeCommand(
+    AppendCallback callback,
+    void * user_data);        
+
 int createPingCommand(
     AppendCallback callback,
     void * user_data);
@@ -87,6 +91,19 @@ int createSetDetectionZoneCommand(
 
 int createSetSensitivityCommand(
     const uint32_t sensitivity,
+    AppendCallback callback,
+    void * user_data);
+
+int createGetSensitivityCommand(
+    AppendCallback callback,
+    void * user_data);
+
+int createSetTxCenterFrequencyCommand(
+    const uint32_t frequencyBand,
+    AppendCallback callback,
+    void * user_data);
+
+int createGetTxCenterFrequencyCommand(
     AppendCallback callback,
     void * user_data);
 
@@ -118,6 +135,10 @@ int createSetLedControlCommand(
     AppendCallback callback,
     void * user_data);
 
+int createGetLedControlCommand(
+    AppendCallback callback,
+    void * user_data);
+
 int createSetBaudRateCommand(
     int baudrate,
     AppendCallback callback,
@@ -136,7 +157,20 @@ int createSystemRunTest(
     const unsigned char test_code,
     AppendCallback callback,
     void * user_data);
-
+    
+int createInjectFrameCommand(
+    uint32_t frame_counter,
+    uint32_t frame_length,
+    const float * frame,
+    AppendCallback callback,
+    void * user_data);
+    
+int createPrepareInjectFrameCommand(
+    uint32_t num_frames,
+    uint32_t num_bins,
+    uint32_t mode,
+    AppendCallback callback,
+    void * user_data);       
 
 int createAppCommand(
     unsigned char app_command,
@@ -241,17 +275,32 @@ int createX4DriverSetIterationsCommand(
     const uint32_t iterations,
     AppendCallback callback,
     void * user_data);
+    
+int createX4DriverGetIterationsCommand(
+    AppendCallback callback,
+    void * user_data);
 
 int createX4DriverSetPulsesPerStepCommand(
     const uint32_t pulsesperstep,
     AppendCallback callback,
     void * user_data);
 
+int createX4DriverGetPulsesPerStepCommand(
+    AppendCallback callback,
+    void * user_data);
+
+
 int createX4DriverSetDownconversionCommand(
     const uint8_t downconversion,
     AppendCallback callback,
     void * user_data);
 
+int createX4DriverGetDownconversionCommand(
+    AppendCallback callback,
+    void * user_data);
+int createX4DriverGetFrameBinCountCommand(
+    AppendCallback callback,
+    void * user_data);
 int createX4DriverSetFrameAreaCommand(
     const float start,
     const float end,
@@ -266,14 +315,26 @@ int createX4DriverSetDacStepCommand(
     const uint8_t dac_step,
     AppendCallback callback,
     void * user_data);
+    
+int createX4DriverGetDacStepCommand(
+    AppendCallback callback,
+    void * user_data);
 
 int createX4DriverSetDacMinCommand(
     const uint32_t dac_min,
     AppendCallback callback,
     void * user_data);
 
+int createX4DriverGetDacMinCommand(
+    AppendCallback callback,
+    void * user_data);
+
 int createX4DriverSetDacMaxCommand(
     const uint32_t dac_max,
+    AppendCallback callback,
+    void * user_data);
+
+int createX4DriverGetDacMaxCommand(
     AppendCallback callback,
     void * user_data);
 
@@ -291,9 +352,16 @@ int createX4DriverSetTxCenterFrequencyCommand(
     const uint8_t tx_center_frequency,
     AppendCallback callback,
     void * user_data);
+int createX4DriverGetTxCenterFrequencyCommand(
+    AppendCallback callback,
+    void * user_data);
 
 int createX4DriverSetTxPowerCommand(
     const uint8_t tx_power,
+    AppendCallback callback,
+    void * user_data);
+    
+int createX4DriverGetTxPowerCommand(
     AppendCallback callback,
     void * user_data);
 
@@ -366,6 +434,11 @@ int createSetIOPinControlCommand(
     AppendCallback callback,
     void * user_data);
 
+int createGetIOPinControlCommand(
+    const uint32_t pin_id,
+    AppendCallback callback,
+    void * user_data);    
+
 int createSetIOPinValueCommand(
     const uint32_t pin_id,
     const uint32_t pin_value,
@@ -396,6 +469,22 @@ int createSetOutputControlCommand(
     AppendCallback callback,
     void * user_data);
 
+int createGetOutputControlCommand(
+    const uint32_t output_feature,    
+    AppendCallback callback,
+    void * user_data); 
+
+int createSetDebugOutputControlCommand(
+    const uint32_t output_feature,
+    const uint32_t output_control,
+    AppendCallback callback,
+    void * user_data);
+
+int createGetDebugOutputControlCommand(
+    const uint32_t output_feature,    
+    AppendCallback callback,
+    void * user_data);        
+
 int createSetBaudRate(
     const uint32_t baudrate,
     AppendCallback callback,
@@ -408,6 +497,10 @@ int createStoreNoiseMapCommand(
 int createLoadNoiseMapCommand(
     AppendCallback callback,
     void * user_data);
+    
+int createDeleteNoiseMapCommand(
+    AppendCallback callback,
+    void * user_data);
 
 int createSetNoiseMapControlCommand(
     const uint32_t control,
@@ -417,6 +510,71 @@ int createSetNoiseMapControlCommand(
 int createGetNoiseMapControlCommand(
     AppendCallback callback,
     void * user_data);
+
+int createSearchForFileTypeCommand(
+    uint32_t type,
+    AppendCallback callback,
+    void * user_data);
+
+int createFindAllFilesCommand(
+    AppendCallback callback,
+    void * user_data);
+
+int createNewFileCommand(
+    uint32_t file_type,
+    uint32_t identifier,
+    uint32_t length,
+    AppendCallback callback,
+    void * user_data);
+
+int createOpenFileCommand(
+    uint32_t file_type,
+    uint32_t identifier,
+    AppendCallback callback,
+    void * user_data);
+
+int createSetFileDataCommand(
+    uint32_t type,
+    uint32_t identifier,
+    uint32_t offset,
+    uint32_t length,
+    const uint8_t * data,
+    AppendCallback callback,
+    void * user_data);
+
+int createCloseFileCommand(
+    uint32_t type,
+    uint32_t identifier,
+    uint32_t commit,
+    AppendCallback callback,
+    void * user_data);
+
+int createGetFileLengthCommand(
+    uint32_t type,
+    uint32_t identifier,
+    AppendCallback callback,
+    void * user_data);
+
+int createDeleteFileCommand(
+    uint32_t type,
+    uint32_t identifier,
+    AppendCallback callback,
+    void * user_data);
+
+int createGetFileDataCommand(
+    uint32_t type,
+    uint32_t identifier,
+    uint32_t offset,
+    uint32_t length,
+    AppendCallback callback,
+    void * user_data);
+
+
+int createFormatFilesystemCommand(
+    uint32_t key,
+    AppendCallback callback,
+    void * user_data);
+
 
 int createGetProfileIdCommand(
     AppendCallback callback,

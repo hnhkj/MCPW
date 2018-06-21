@@ -22,8 +22,24 @@ McpParser_t *createMcpParser(void * user_data, void * instance_memory)
 
     instance->onMcpPing = NULL;
     instance->onMcpStartBootloader = NULL;
+    instance->onMcpGetCrashDumpLength = NULL;
+    instance->onMcpClearCrashDump = NULL;
+    instance->onMcpGetCrashDump = NULL;
+    instance->onMcpSearchFileType = NULL;
+    instance->onMcpFindAllFiles = NULL;
+    instance->onMcpCreateNewFile = NULL;
+    instance->onMcpOpenFile = NULL;
+    instance->onMcpSetFileData = NULL;
+    instance->onMcpCommitFile = NULL;
+    instance->onMcpDeleteFile = NULL;
+    instance->onMcpGetFileLength = NULL;
+    instance->onMcpGetFileData = NULL;
+    instance->onMcpFormatFilesystem = NULL;
+    instance->onMcpInjectFrame = NULL;
+    instance->onMcpPrepareInjectFrame = NULL;    
 
     instance->onMcpSetLedControl = NULL;
+    instance->onMcpGetLedControl = NULL;
     instance->onMcpModuleReset = NULL;
     instance->onMcpResetToFactoryPreset = NULL;
     instance->onMcpSystemRunTest = NULL;
@@ -34,37 +50,55 @@ McpParser_t *createMcpParser(void * user_data, void * instance_memory)
     instance->onMcpGetParameterFile = NULL;
 
     instance->onMcpSetSensorMode = NULL;
+    instance->onMcpGetSensorMode = NULL;    
     instance->onMcpLoadProfile = NULL;
     instance->onMcpGetProfileId = NULL;
     instance->onMcpProfileSetDetectionZone = NULL;
     instance->onMcpProfileGetDetectionZone = NULL;
     instance->onMcpProfileGetDetectionZoneLimits = NULL;
     instance->onMcpProfileSetSensitivity = NULL;
+    instance->onMcpProfileGetSensitivity = NULL;
+    instance->onMcpProfileSetTXCenterFrequency = NULL;
+    instance->onMcpProfileGetTXCenterFrequency = NULL;
     instance->onMcpSetParameterFile = NULL;
     instance->onMcpGetParameterFile = NULL;
 
     instance->onMcpSetOutputControl = NULL;
+    instance->onMcpGetOutputControl = NULL;
+    instance->onMcpSetDebugOutputControl = NULL;
+    instance->onMcpGetDebugOutputControl = NULL;    
 
     instance->onMcpSetNoisemapControl = NULL;
     instance->onMcpGetNoisemapControl = NULL;
 
     instance->onMcpSetIOPinControl = NULL;
+    instance->onMcpGetIOPinControl = NULL;
     instance->onMcpSetIOPinValue = NULL;
     instance->onMcpGetIOPinValue = NULL;
 
+
     instance->onMcpX4DriverSetFps = NULL;
     instance->onMcpX4DriverSetIterations = NULL;
+    instance->onMcpX4DriverGetIterations = NULL;
     instance->onMcpX4DriverSetPulsesPerStep = NULL;
+    instance->onMcpX4DriverGetPulsesPerStep = NULL;
     instance->onMcpX4DriverSetDownconversion = NULL;
+    instance->onMcpX4DriverGetDownconversion = NULL;
     instance->onMcpX4DriverSetFrameArea = NULL;
     instance->onMcpX4DriverSetFrameAreaOffset = NULL;
     instance->onMcpX4DriverInit = NULL;
     instance->onMcpX4DriverSetDacStep = NULL;
+    instance->onMcpX4DriverGetDacStep = NULL;
     instance->onMcpX4DriverSetDacMin = NULL;
+    instance->onMcpX4DriverGetDacMin = NULL;
     instance->onMcpX4DriverSetDacMax = NULL;
+    instance->onMcpX4DriverGetDacMax = NULL;
+    instance->onMcpX4DriverGetFrameBinCount = NULL;
     instance->onMcpX4DriverSetEnable = NULL;
     instance->onMcpX4DriverSetTxCenterFrequency = NULL;
+    instance->onMcpX4DriverGetTxCenterFrequency = NULL;
     instance->onMcpX4DriverSetTxPower = NULL;
+    instance->onMcpX4DriverGetTxPower = NULL;
     instance->onMcpX4DriverGetFps = NULL;
     instance->onMcpX4DriverSetSpiRegister = NULL;
     instance->onMcpX4DriverGetSpiRegister = NULL;
@@ -78,7 +112,6 @@ McpParser_t *createMcpParser(void * user_data, void * instance_memory)
     instance->onMcpX4DriverGetPrfDiv = NULL;
     instance->onMcpX4DriverGetFrameArea = NULL;
     instance->onMcpX4DriverGetFrameAreaOffset = NULL;
-
     instance->onMcpUnknown = NULL;
 
     return instance;
@@ -110,6 +143,7 @@ static float extract_float(const uint8_t* data, uint32_t* index)
 
     return f_val;
 }
+
 
 int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t length)
 {
@@ -185,6 +219,136 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                 return 0;
             }
         }
+        else if (direct_command == XTS_SDC_GET_CRASH_DUMP_LENGTH)
+        {
+            if (mcp_parser->onMcpGetCrashDumpLength)
+            {
+                mcp_parser->onMcpGetCrashDumpLength(mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_CLEAR_CRASH_DUMP)
+        {
+            if (mcp_parser->onMcpClearCrashDump)
+            {
+                mcp_parser->onMcpClearCrashDump(mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_GET_CRASH_DUMP)
+        {
+            const uint32_t offset = extract_uint32(data, &index);
+            const uint32_t len = extract_uint32(data, &index);
+
+            if (mcp_parser->onMcpGetCrashDump)
+            {
+                mcp_parser->onMcpGetCrashDump(offset, len, mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_SEARCH_FILE_TYPE)
+        {
+            const uint32_t type = extract_uint32(data, &index);
+
+            if (mcp_parser->onMcpSearchFileType)
+            {
+                mcp_parser->onMcpSearchFileType(type, mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_FIND_ALL_FILES)
+        {
+            if (mcp_parser->onMcpFindAllFiles)
+            {
+                mcp_parser->onMcpFindAllFiles(mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_CREATE_NEW_FILE)
+        {
+            if (mcp_parser->onMcpCreateNewFile)
+            {
+                const uint32_t type = extract_uint32(data, &index);
+                const uint32_t id = extract_uint32(data, &index);
+                const uint32_t len = extract_uint32(data, &index);
+                mcp_parser->onMcpCreateNewFile(type, id, len, mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_OPEN_FILE)
+        {
+            if (mcp_parser->onMcpOpenFile)
+            {
+                const uint32_t type = extract_uint32(data, &index);
+                const uint32_t id = extract_uint32(data, &index);
+                mcp_parser->onMcpOpenFile(type, id, mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_SET_FILE_DATA)
+        {
+            if (mcp_parser->onMcpSetFileData)
+            {
+                const uint32_t type = extract_uint32(data, &index);
+                const uint32_t id = extract_uint32(data, &index);
+                const uint32_t offset = extract_uint32(data, &index);
+                const uint32_t len = extract_uint32(data, &index);
+                mcp_parser->onMcpSetFileData(type, id, offset, len, &data[index], mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_CLOSE_FILE)
+        {
+            if (mcp_parser->onMcpCommitFile)
+            {
+                const uint32_t type = extract_uint32(data, &index);
+                const uint32_t id = extract_uint32(data, &index);
+                const uint32_t commit = extract_uint32(data, &index);
+                mcp_parser->onMcpCommitFile(type, id, commit, mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_DELETE_FILE)
+        {
+            if (mcp_parser->onMcpDeleteFile)
+            {
+                const uint32_t type = extract_uint32(data, &index);
+                const uint32_t id = extract_uint32(data, &index);
+                mcp_parser->onMcpDeleteFile(type, id, mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_FORMAT_FILESYSTEM)
+        {
+            if (mcp_parser->onMcpFormatFilesystem)
+            {
+                const uint32_t key = extract_uint32(data, &index);
+                mcp_parser->onMcpFormatFilesystem(key, mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_GET_FILE_LENGTH)
+        {
+            if (mcp_parser->onMcpGetFileLength)
+            {
+                const uint32_t type = extract_uint32(data, &index);
+                const uint32_t id = extract_uint32(data, &index);
+                mcp_parser->onMcpGetFileLength(type, id, mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_GET_FILE_DATA)
+        {
+            if (mcp_parser->onMcpGetFileData)
+            {
+                const uint32_t type = extract_uint32(data, &index);
+                const uint32_t id = extract_uint32(data, &index);
+                const uint32_t offset = extract_uint32(data, &index);
+                const uint32_t len = extract_uint32(data, &index);
+                mcp_parser->onMcpGetFileData(type, id, offset, len, mcp_parser->user_data);
+                return 0;
+            }
+        }
         else if (direct_command == XTS_SDC_SYSTEM_TEST)
         {
             uint8_t testcode = extract_byte(data, &index);
@@ -212,6 +376,30 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                 return 0;
             }
         }
+        else if (direct_command == XTS_SDC_INJECT_FRAME)
+        {
+            uint32_t frameCounter = extract_uint32(data, &index);
+            uint32_t frameLength = extract_uint32(data, &index);
+            float* frame = (float*)(((uintptr_t)&data[index-4]) & ~(4-1));
+            memmove(frame, &data[index], sizeof(float)*frameLength*2);
+
+            if (mcp_parser->onMcpInjectFrame)
+            {
+                mcp_parser->onMcpInjectFrame(frameCounter, frame, frameLength, mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if (direct_command == XTS_SDC_PREPARE_INJECT_FRAME)
+        {
+            uint32_t numFrames = extract_uint32(data, &index);
+            uint32_t numBins = extract_uint32(data, &index);
+            uint32_t mode = extract_uint32(data, &index);
+            if (mcp_parser->onMcpPrepareInjectFrame)
+            {
+                mcp_parser->onMcpPrepareInjectFrame(numFrames, numBins, mode, mcp_parser->user_data);
+                return 0;
+            }            
+        }        
     }
     else if (command == XTS_SPC_HIL)
     {
@@ -256,6 +444,13 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                 mcp_parser->onMcpLoadNoiseMap(mcp_parser->user_data);
                 return 0;
             }
+        } else if (app_command == XTS_SPCA_DELETE_NOISEMAP)
+        {
+            if (mcp_parser->onMcpDeleteNoiseMap)
+            {
+                mcp_parser->onMcpDeleteNoiseMap(mcp_parser->user_data);
+                return 0;
+            }
         }
         else if (app_command == XTS_SPCA_SET)
         {
@@ -279,6 +474,25 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                 if (mcp_parser->onMcpProfileSetSensitivity)
                 {
                     mcp_parser->onMcpProfileSetSensitivity(sensitivity, mcp_parser->user_data);
+                    return 0;
+                }
+            }
+            else if(app_command_object == XTS_ID_LED_CONTROL)
+            {
+                uint8_t mode = extract_byte(data, &index);
+                uint8_t intensity = extract_byte(data, &index);                
+                if (mcp_parser->onMcpSetLedControl)
+                {                    
+                    mcp_parser->onMcpSetLedControl(mode, intensity, mcp_parser->user_data);
+                    return 0;
+                }                    
+            }                     
+            else if (app_command_object == XTS_ID_TX_CENTER_FREQ)
+            {
+                uint32_t frequencyBand = extract_uint32(data, &index);
+                if (mcp_parser->onMcpProfileSetTXCenterFrequency)
+                {
+                    mcp_parser->onMcpProfileSetTXCenterFrequency(frequencyBand, mcp_parser->user_data);
                     return 0;
                 }
             }
@@ -328,6 +542,14 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                     return 0;
                 }
             }
+            else if (app_command_object == XTS_ID_TX_CENTER_FREQ)
+            {
+                if (mcp_parser->onMcpProfileGetTXCenterFrequency)
+                {
+                    mcp_parser->onMcpProfileGetTXCenterFrequency(mcp_parser->user_data);
+                    return 0;
+                }
+            }
             else if (app_command_object == XTS_ID_DETECTION_ZONE_LIMITS)
             {
                 if (mcp_parser->onMcpProfileGetDetectionZoneLimits)
@@ -336,6 +558,22 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                     return 0;
                 }
             }
+            else if (app_command_object == XTS_ID_SENSITIVITY)
+            {                
+                if (mcp_parser->onMcpProfileGetSensitivity)
+                {
+                    mcp_parser->onMcpProfileGetSensitivity(mcp_parser->user_data);
+                    return 0;
+                }
+            }           
+            else if(app_command_object == XTS_ID_LED_CONTROL)
+            {
+                if (mcp_parser->onMcpGetLedControl)
+                {
+                    mcp_parser->onMcpGetLedControl(mcp_parser->user_data);
+                    return 0;
+                }                    
+            }            
         }
     }
     else if (command == XTS_SPC_IOPIN)
@@ -354,6 +592,17 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                 return 0;
             }
         }
+        else if (iopin_command == XTS_SPCIOP_GETCONTROL)
+        {
+            uint32_t pin_id = extract_uint32(data, &index);
+            
+            // Send to application layer.
+            if (mcp_parser->onMcpGetIOPinControl)
+            {
+                mcp_parser->onMcpGetIOPinControl(pin_id, mcp_parser->user_data);
+                return 0;
+            }
+        }        
         else if (iopin_command == XTS_SPCIOP_SETVALUE)
         {
             uint32_t pin_id = extract_uint32(data, &index);
@@ -392,7 +641,45 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                 return 0;
             }
         }
+        else if(output_command == XTS_SPCO_GETCONTROL)
+        {
+            uint32_t output_feature = extract_uint32(data, &index);       
+
+            // Send to application layer.
+            if (mcp_parser->onMcpGetOutputControl)
+            {
+                mcp_parser->onMcpGetOutputControl(output_feature, mcp_parser->user_data);
+                return 0;
+            }
+        }       
     }
+    else if (command == XTS_SPC_DEBUG_OUTPUT)
+    {
+        uint8_t output_command = extract_byte(data, &index);
+        if (output_command == XTS_SPCO_SETCONTROL)
+        {
+            uint32_t output_feature = extract_uint32(data, &index);
+            uint32_t output_control = extract_uint32(data, &index);
+
+            // Send to application layer.
+            if (mcp_parser->onMcpSetDebugOutputControl)
+            {
+                mcp_parser->onMcpSetDebugOutputControl(output_feature, output_control, mcp_parser->user_data);
+                return 0;
+            }
+        }
+        else if(output_command == XTS_SPCO_GETCONTROL)
+        {
+            uint32_t output_feature = extract_uint32(data, &index);       
+
+            // Send to application layer.
+            if (mcp_parser->onMcpGetDebugOutputControl)
+            {
+                mcp_parser->onMcpGetDebugOutputControl(output_feature, mcp_parser->user_data);
+                return 0;
+            }
+        }       
+    }    
     else if (command == XTS_SPC_MOD_NOISEMAP)
     {
         uint8_t output_command = extract_byte(data, &index);
@@ -643,6 +930,87 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                     return 0;
                 }
             }
+            else if (x4driver_id == XTS_SPCXI_TXPOWER)
+            {
+                // Send to application layer.
+                if (mcp_parser->onMcpX4DriverGetTxPower)
+                {
+                    mcp_parser->onMcpX4DriverGetTxPower(mcp_parser->user_data);
+                    return 0;
+                }
+            }
+            else if (x4driver_id == XTS_SPCXI_ITERATIONS)
+            {
+                // Send to application layer.
+                if (mcp_parser->onMcpX4DriverGetIterations)
+                {
+                    mcp_parser->onMcpX4DriverGetIterations(mcp_parser->user_data);
+                    return 0;
+                }
+            }            
+            else if (x4driver_id == XTS_SPCXI_PULSESPERSTEP)
+            {
+                // Send to application layer.
+                if (mcp_parser->onMcpX4DriverGetPulsesPerStep)
+                {
+                    mcp_parser->onMcpX4DriverGetPulsesPerStep(mcp_parser->user_data);
+                    return 0;
+                }
+            }             
+            else if (x4driver_id == XTS_SPCXI_DACSTEP)
+            {
+                // Send to application layer.
+                if (mcp_parser->onMcpX4DriverGetDacStep)
+                {
+                    mcp_parser->onMcpX4DriverGetDacStep(mcp_parser->user_data);
+                    return 0;
+                }
+            }
+            else if (x4driver_id == XTS_SPCXI_DACMIN)
+            {
+                // Send to application layer.
+                if (mcp_parser->onMcpX4DriverGetDacMin)
+                {
+                    mcp_parser->onMcpX4DriverGetDacMin(mcp_parser->user_data);
+                    return 0;
+                }
+            }            
+            else if (x4driver_id == XTS_SPCXI_DACMAX)
+            {
+                // Send to application layer.
+                if (mcp_parser->onMcpX4DriverGetDacMax)
+                {
+                    mcp_parser->onMcpX4DriverGetDacMax(mcp_parser->user_data);
+                    return 0;
+                }
+            }            
+            else if (x4driver_id == XTS_SPCXI_DOWNCONVERSION)
+            {
+                // Send to application layer.
+                if (mcp_parser->onMcpX4DriverGetDownconversion)
+                {
+                    mcp_parser->onMcpX4DriverGetDownconversion(mcp_parser->user_data);
+                    return 0;
+                }
+            }            
+            else if (x4driver_id == XTS_SPCXI_FRAMEBINCOUNT)
+            {
+                // Send to application layer.
+                if (mcp_parser->onMcpX4DriverGetFrameBinCount)
+                {
+                    mcp_parser->onMcpX4DriverGetFrameBinCount(mcp_parser->user_data);
+                    return 0;
+                }
+            }            
+            else if (x4driver_id == XTS_SPCXI_TXCENTERFREQUENCY)
+            {
+                // Send to application layer.
+                if (mcp_parser->onMcpX4DriverGetTxCenterFrequency)
+                {
+                    mcp_parser->onMcpX4DriverGetTxCenterFrequency(mcp_parser->user_data);
+                    return 0;
+                }
+            }            
             else if (x4driver_id == XTS_SPCXI_SPIREGISTER)
             {
                 uint8_t address = extract_byte(data, &index);
@@ -724,8 +1092,16 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
             mcp_parser->onMcpSetSensorMode(mode, param, mcp_parser->user_data);
             return 0;
         }
+    }    
+    else if (command == XTS_SPC_MOD_GETMODE)
+    {
+        if (mcp_parser->onMcpGetSensorMode)
+        {
+            mcp_parser->onMcpGetSensorMode(mcp_parser->user_data);
+            return 0;
+        }      
     }
-
+    
     // If this code is reached, no parsing was successful.
     if (mcp_parser->onMcpUnknown)
     {

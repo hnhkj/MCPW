@@ -155,6 +155,23 @@ void mcpw_on_host_parser_baseband_ap(BasebandApData data, void * user_data)
 	cout << endl;
 }
 
+void mcpw_on_host_parser_vitalsigns(VitalSignsData data, void * user_data)
+{
+	cout << "VitalSigns: Counter=" << data.frame_counter;
+	cout << ", SensorState=" << data.sensor_state;
+	cout << ", RespirationRate=" << data.respiration_rate;
+	cout << ", RespirationDistance=" << data.respiration_distance;
+	cout << ", RespirationConfidence=" << data.respiration_confidence;
+	cout << ", HeartRate=" << data.heart_rate;
+	cout << ", HeartDistance=" << data.heart_distance;
+	cout << ", HeartConfidence=" << data.heart_confidence;
+	cout << ", NormalizedMovementSlow=" << data.normalized_movement_slow;
+	cout << ", NormalizedMovementFast=" << data.normalized_movement_fast;
+	cout << ", NormalizedMovementStart=" << data.normalized_movement_start;
+	cout << ", NormalizedMovementEnd=" << data.normalized_movement_end;
+	cout << endl;
+}
+
 void mcpw_on_host_parser_data_float(FloatData data, void * user_data)
 {
 	cout << "Float: ContentID=" << data.content_id;
@@ -298,6 +315,7 @@ int mcpw_demo_x4m200(char* com_port)
 	mcpw->mcp_host_parser->respiration = mcpw_on_host_parser_respiration; // X4M200 legacy respiration message (original X2M200 resp message)
 	mcpw->mcp_host_parser->respiration_movinglist = mcpw_on_host_parser_respiration_moving_list; // X4M200 movinglist message
 	mcpw->mcp_host_parser->baseband_ap = mcpw_on_host_parser_baseband_ap; // X4M200 baseband AP message
+    mcpw->mcp_host_parser->vitalsigns = mcpw_on_host_parser_vitalsigns; // X4M200 vitalsigns message
 	mcpw->user_reference = (void*)moduleIo;
 
 	cout << "Starting serial port read thread." << endl;
@@ -323,6 +341,7 @@ int mcpw_demo_x4m200(char* com_port)
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_RESP_STATUS, XTID_OUTPUT_CONTROL_DISABLE)) cout << "mcpw_set_output_control(XTS_ID_RESP_STATUS) failed." << endl;
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_RESPIRATION_MOVINGLIST, XTID_OUTPUT_CONTROL_DISABLE)) cout << "mcpw_set_output_control(XTS_ID_RESPIRATION_MOVINGLIST) failed." << endl;
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_BASEBAND_AMPLITUDE_PHASE, XTID_OUTPUT_CONTROL_ENABLE)) cout << "mcpw_set_output_control(XTS_ID_BASEBAND_AMPLITUDE_PHASE) failed." << endl;
+    if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_VITAL_SIGNS, XTID_OUTPUT_CONTROL_ENABLE)) cout << "mcpw_set_output_control(XTS_ID_VITAL_SIGNS) failed.\n" << endl;
 	// Start module execution.
 	if (MCPW_OK != mcpw_set_sensor_mode(mcpw, XTS_SM_RUN, 0)) cout << "mcpw_set_sensor_mode failed." << endl;
 
@@ -462,6 +481,7 @@ int mcpw_demo_upgrade_x4m300(char* com_port)
 
 int main(int argc, char *argv[])
 {
+	cout << "Add XeThru module serial port as parameter, e.g. COM1.";
 	if (argc < 1)
 	{
 		cout << "Add XeThru module serial port as parameter, e.g. COM1.";

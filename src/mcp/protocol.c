@@ -454,6 +454,15 @@ int createSetSensorModeCommand(
     return 0;
 }
 
+int createGetSensorModeCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_MOD_GETMODE, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
 
 int createPingCommand(
     AppendCallback callback,
@@ -534,6 +543,18 @@ int createSetLedControlCommand(
     return 0;
 }
 
+int createGetLedControlCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_APPCOMMAND, callback, user_data);    
+    process_byte(XTS_SPCA_GET, callback, user_data);
+    process_int(XTS_ID_LED_CONTROL, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
 
 int createSetBaudRateCommand(
     int baudrate,
@@ -587,6 +608,39 @@ int createSystemGetInfoCommand(
     return 0;
 }
 
+int createInjectFrameCommand(
+    uint32_t frame_counter,
+    uint32_t frame_length,
+    const float * frame,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_INJECT_FRAME, callback, user_data);
+    process_uint(frame_counter, callback, user_data);
+    process_uint(frame_length, callback, user_data);
+    process_floats(frame, frame_length * 2, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+int createPrepareInjectFrameCommand(
+    uint32_t num_frames,
+    uint32_t num_bins,
+    uint32_t mode,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_PREPARE_INJECT_FRAME, callback, user_data);
+    process_uint(num_frames, callback, user_data);
+    process_uint(num_bins, callback, user_data);
+    process_uint(mode, callback, user_data);    
+    packet_end(callback, user_data);
+    return 0;
+}
 
 int createAppCommand(
     unsigned char app_command,
@@ -682,6 +736,43 @@ int createSetSensitivityCommand(
     process_byte(XTS_SPCA_SET, callback, user_data);
     process_int(XTS_ID_SENSITIVITY, callback, user_data);
     process_int(sensitivity, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+int createGetSensitivityCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_APPCOMMAND, callback, user_data);    
+    process_byte(XTS_SPCA_GET, callback, user_data);
+    process_int(XTS_ID_SENSITIVITY, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+int createSetTxCenterFrequencyCommand(
+    const uint32_t frequencyBand,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_APPCOMMAND, callback, user_data);
+    process_byte(XTS_SPCA_SET, callback, user_data);
+    process_int(XTS_ID_TX_CENTER_FREQ, callback, user_data);
+    process_int(frequencyBand, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+int createGetTxCenterFrequencyCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_APPCOMMAND, callback, user_data);
+    process_byte(XTS_SPCA_GET, callback, user_data);
+    process_int(XTS_ID_TX_CENTER_FREQ, callback, user_data);
     packet_end(callback, user_data);
     return 0;
 }
@@ -931,7 +1022,17 @@ int createX4DriverSetIterationsCommand(
     packet_end(callback, user_data);
     return 0;
 }
-
+int createX4DriverGetIterationsCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_X4DRIVER, callback, user_data);
+    process_byte(XTS_SPCX_GET, callback, user_data);
+    process_int(XTS_SPCXI_ITERATIONS, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
 int createX4DriverSetPulsesPerStepCommand(
     const uint32_t pulsesperstep,
     AppendCallback callback,
@@ -942,6 +1043,17 @@ int createX4DriverSetPulsesPerStepCommand(
     process_byte(XTS_SPCX_SET, callback, user_data);
     process_int(XTS_SPCXI_PULSESPERSTEP, callback, user_data);
     process_int(pulsesperstep, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+int createX4DriverGetPulsesPerStepCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_X4DRIVER, callback, user_data);
+    process_byte(XTS_SPCX_GET, callback, user_data);
+    process_int(XTS_SPCXI_PULSESPERSTEP, callback, user_data);
     packet_end(callback, user_data);
     return 0;
 }
@@ -956,6 +1068,28 @@ int createX4DriverSetDownconversionCommand(
     process_byte(XTS_SPCX_SET, callback, user_data);
     process_int(XTS_SPCXI_DOWNCONVERSION, callback, user_data);
     process_byte(downconversion, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+int createX4DriverGetDownconversionCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_X4DRIVER, callback, user_data);
+    process_byte(XTS_SPCX_GET, callback, user_data);
+    process_int(XTS_SPCXI_DOWNCONVERSION, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+int createX4DriverGetFrameBinCountCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_X4DRIVER, callback, user_data);
+    process_byte(XTS_SPCX_GET, callback, user_data);
+    process_int(XTS_SPCXI_FRAMEBINCOUNT, callback, user_data);
     packet_end(callback, user_data);
     return 0;
 }
@@ -1000,7 +1134,17 @@ int createX4DriverSetDacStepCommand(
     packet_end(callback, user_data);
     return 0;
 }
-
+int createX4DriverGetDacStepCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_X4DRIVER, callback, user_data);
+    process_byte(XTS_SPCX_GET, callback, user_data);
+    process_int(XTS_SPCXI_DACSTEP, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
 int createX4DriverSetDacMinCommand(
     const uint32_t dac_min,
     AppendCallback callback,
@@ -1011,6 +1155,17 @@ int createX4DriverSetDacMinCommand(
     process_byte(XTS_SPCX_SET, callback, user_data);
     process_int(XTS_SPCXI_DACMIN, callback, user_data);
     process_int(dac_min, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+int createX4DriverGetDacMinCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_X4DRIVER, callback, user_data);
+    process_byte(XTS_SPCX_GET, callback, user_data);
+    process_int(XTS_SPCXI_DACMIN, callback, user_data);
     packet_end(callback, user_data);
     return 0;
 }
@@ -1025,6 +1180,18 @@ int createX4DriverSetDacMaxCommand(
     process_byte(XTS_SPCX_SET, callback, user_data);
     process_int(XTS_SPCXI_DACMAX, callback, user_data);
     process_int(dac_max, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+int createX4DriverGetDacMaxCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_X4DRIVER, callback, user_data);
+    process_byte(XTS_SPCX_GET, callback, user_data);
+    process_int(XTS_SPCXI_DACMAX, callback, user_data);
     packet_end(callback, user_data);
     return 0;
 }
@@ -1071,6 +1238,18 @@ int createX4DriverSetTxCenterFrequencyCommand(
     return 0;
 }
 
+int createX4DriverGetTxCenterFrequencyCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_X4DRIVER, callback, user_data);
+    process_byte(XTS_SPCX_GET, callback, user_data);
+    process_int(XTS_SPCXI_TXCENTERFREQUENCY, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
 int createX4DriverSetTxPowerCommand(
     const uint8_t tx_power,
     AppendCallback callback,
@@ -1081,6 +1260,17 @@ int createX4DriverSetTxPowerCommand(
     process_byte(XTS_SPCX_SET, callback, user_data);
     process_int(XTS_SPCXI_TXPOWER, callback, user_data);
     process_byte(tx_power, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+int createX4DriverGetTxPowerCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_X4DRIVER, callback, user_data);
+    process_byte(XTS_SPCX_GET, callback, user_data);
+    process_int(XTS_SPCXI_TXPOWER, callback, user_data);
     packet_end(callback, user_data);
     return 0;
 }
@@ -1288,6 +1478,19 @@ int createSetIOPinControlCommand(
     return 0;
 }
 
+int createGetIOPinControlCommand(
+    const uint32_t pin_id,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_IOPIN, callback, user_data);
+    process_byte(XTS_SPCIOP_GETCONTROL, callback, user_data);
+    process_uint(pin_id, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
 int createSetIOPinValueCommand(
     const uint32_t pin_id,
     const uint32_t pin_value,
@@ -1363,6 +1566,46 @@ int createSetOutputControlCommand(
     return 0;
 }
 
+int createGetOutputControlCommand(
+    const uint32_t output_feature,    
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_OUTPUT, callback, user_data);
+    process_byte(XTS_SPCO_GETCONTROL, callback, user_data);
+    process_uint(output_feature, callback, user_data);    
+    packet_end(callback, user_data);
+    return 0;
+}
+
+int createSetDebugOutputControlCommand(
+    const uint32_t output_feature,
+    const uint32_t output_control,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DEBUG_OUTPUT, callback, user_data);
+    process_byte(XTS_SPCO_SETCONTROL, callback, user_data);
+    process_uint(output_feature, callback, user_data);
+    process_uint(output_control, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+int createGetDebugOutputControlCommand(
+    const uint32_t output_feature,    
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DEBUG_OUTPUT, callback, user_data);
+    process_byte(XTS_SPCO_GETCONTROL, callback, user_data);
+    process_uint(output_feature, callback, user_data);    
+    packet_end(callback, user_data);
+    return 0;
+}
 
 int createSetBaudRate(
     const uint32_t baudrate,
@@ -1400,6 +1643,17 @@ int createLoadNoiseMapCommand(
     return 0;
 }
 
+int createDeleteNoiseMapCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_APPCOMMAND, callback, user_data);
+    process_byte(XTS_SPCA_DELETE_NOISEMAP, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
 int createSetNoiseMapControlCommand(
     const uint32_t control,
     AppendCallback callback,
@@ -1420,6 +1674,192 @@ int createGetNoiseMapControlCommand(
     packet_start(callback, user_data);
     process_byte(XTS_SPC_MOD_NOISEMAP, callback, user_data);
     process_byte(XTS_SPCN_GETCONTROL, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+/* int createGetParameterFileCommand( */
+/*     AppendCallback callback, */
+/*     void * user_data) */
+/* { */
+/*     packet_start(callback, user_data); */
+/*     process_byte(XTS_SPC_DIR_COMMAND, callback, user_data); */
+/*     process_byte(XTS_SDC_GET_PARAMETER_FILE, callback, user_data); */
+/*     packet_end(callback, user_data); */
+/*     return 0; */
+/* } */
+
+
+int createSearchForFileTypeCommand(
+    uint32_t type,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_SEARCH_FILE_TYPE, callback, user_data);
+    process_uint(type, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+
+int createFindAllFilesCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_FIND_ALL_FILES, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+
+int createNewFileCommand(
+    uint32_t file_type,
+    uint32_t identifier,
+    uint32_t length,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_CREATE_NEW_FILE, callback, user_data);
+    process_uint(file_type, callback, user_data);
+    process_uint(identifier, callback, user_data);
+    process_uint(length, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+
+int createOpenFileCommand(
+    uint32_t file_type,
+    uint32_t identifier,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_OPEN_FILE, callback, user_data);
+    process_uint(file_type, callback, user_data);
+    process_uint(identifier, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+
+int createSetFileDataCommand(
+    uint32_t type,
+    uint32_t identifier,
+    uint32_t offset,
+    uint32_t length,
+    const uint8_t * data,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_SET_FILE_DATA, callback, user_data);
+    process_uint(type, callback, user_data);
+    process_uint(identifier, callback, user_data);
+    process_uint(offset, callback, user_data);
+    process_uint(length, callback, user_data);
+    process_bytes(data, length, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+int createCloseFileCommand(
+    uint32_t type,
+    uint32_t identifier,
+    uint32_t commit,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_CLOSE_FILE, callback, user_data);
+    process_uint(type, callback, user_data);
+    process_uint(identifier, callback, user_data);
+    process_uint(commit, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+int createGetFileLengthCommand(
+    uint32_t type,
+    uint32_t identifier,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_GET_FILE_LENGTH, callback, user_data);
+    process_uint(type, callback, user_data);
+    process_uint(identifier, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+
+int createDeleteFileCommand(
+    uint32_t type,
+    uint32_t identifier,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_DELETE_FILE, callback, user_data);
+    process_uint(type, callback, user_data);
+    process_uint(identifier, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+
+int createGetFileDataCommand(
+    uint32_t type,
+    uint32_t identifier,
+    uint32_t offset,
+    uint32_t length,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_GET_FILE_DATA, callback, user_data);
+    process_uint(type, callback, user_data);
+    process_uint(identifier, callback, user_data);
+    process_uint(offset, callback, user_data);
+    process_uint(length, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+}
+
+int createFormatFilesystemCommand(
+    uint32_t key,
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_FORMAT_FILESYSTEM, callback, user_data);
+    process_uint(key, callback, user_data);
+    packet_end(callback, user_data);
+    return 0;
+
+}
+
+int createGetProfileIdCommand(
+    AppendCallback callback,
+    void * user_data)
+{
+    packet_start(callback, user_data);
+    process_byte(XTS_SPC_DIR_COMMAND, callback, user_data);
+    process_byte(XTS_SDC_GET_PROFILEID, callback, user_data);
     packet_end(callback, user_data);
     return 0;
 }
