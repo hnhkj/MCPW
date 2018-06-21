@@ -1,5 +1,8 @@
 # MCP Wrapper changelog
 
+## 1.4.0
+- Added vitalsigns message support
+
 ## 1.3.0-beta
 - added example for X4M200
 - added support for baudrate change
