@@ -421,8 +421,8 @@ int mcpw_demo_x4m300()
 	// Wait indefinately for readThread to finish.
 	for (;;)
 	{
-		// Every 3 minutes, store noisemap.
-		vTaskDelay(3*60*1000UL / portTICK_RATE_MS);
+		// Every 12 hours, store noisemap.
+		vTaskDelay(12*60*60*1000UL / portTICK_RATE_MS);
 		res = mcpw_store_noisemap(mcpw);
 		printf("Store noisemap %s.\n", (res == MCPW_OK ? "succeeded" : "failed"));
 	}
@@ -476,8 +476,8 @@ int mcpw_demo_x4m200()
 	// Wait indefinately for readThread to finish.
 	for (;;)
 	{
-		// Every 3 minutes, store noisemap.
-		vTaskDelay(3*60*1000UL / portTICK_RATE_MS);
+		// Every 12 hours, store noisemap.
+		vTaskDelay(12*60*60*1000UL / portTICK_RATE_MS);
 		res = mcpw_store_noisemap(mcpw);
 		printf("Store noisemap %s.\n", (res == MCPW_OK ? "succeeded" : "failed"));
 	}

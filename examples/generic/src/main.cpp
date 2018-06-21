@@ -274,8 +274,8 @@ int mcpw_demo_x4m300(char* com_port)
 	// Wait indefinately for readThread to finish.
 	for (;;)
 	{
-		// Every 30 minutes, store noisemap.
-		std::this_thread::sleep_for(std::chrono::minutes(30));
+		// Every 12 hours, store noisemap.
+		std::this_thread::sleep_for(std::chrono::minutes(12*60));
 		res = mcpw_store_noisemap(mcpw);
 		cout << "Store noisemap " << (res == MCPW_OK ? "succeeded" : "failed") << "." << endl;
 	}
@@ -349,8 +349,8 @@ int mcpw_demo_x4m200(char* com_port)
 	// Wait indefinately for readThread to finish.
 	for (;;)
 	{
-		// Every 30 minutes, store noisemap.
-		std::this_thread::sleep_for(std::chrono::minutes(30));
+		// Every 12 hours, store noisemap.
+		std::this_thread::sleep_for(std::chrono::minutes(12*60));
 		res = mcpw_store_noisemap(mcpw);
 		cout << "Store noisemap " << (res == MCPW_OK ? "succeeded" : "failed") << "." << endl;
 	}
