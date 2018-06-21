@@ -481,7 +481,6 @@ int mcpw_demo_upgrade_x4m300(char* com_port)
 
 int main(int argc, char *argv[])
 {
-	cout << "Add XeThru module serial port as parameter, e.g. COM1.";
 	if (argc < 1)
 	{
 		cout << "Add XeThru module serial port as parameter, e.g. COM1.";
