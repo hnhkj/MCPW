@@ -26,6 +26,7 @@ void mcpw_on_host_parser_respiration_moving_list(RespirationMovingListData data,
 void mcpw_on_host_parser_presence_single(PresenceSingleData data, void * user_data); // Data parsed: PresenceSingle message
 void mcpw_on_host_parser_presence_moving_list(PresenceMovingListData data, void * user_data); // Data parsed: Presence MovingList message
 void mcpw_on_host_parser_baseband_ap(BasebandApData data, void * user_data); // Data parsed: Baseband AP
+void mcpw_on_host_parser_vitalsigns(VitalSignsData data, void * user_data); // Data parsed: VitalSigns
 
 void mcpw_on_host_parser_data_float(FloatData data, void * user_data); // Data parsed: Float array
 //! [MCPW Platform Methods]
