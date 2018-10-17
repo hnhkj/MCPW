@@ -12,8 +12,12 @@ extern "C" {
 #define XTS_ID_APP_SLEEP            0x00f17b17
 #define XTS_ID_APP_RESPIRATION_2    0x064e57ad
 #define XTS_ID_APP_RESPIRATION_3    0x47fabeba
+#define XTS_ID_APP_RESPIRATION_4    0x4ac5d074
+#define XTS_ID_APP_RESPIRATION_5    0xa9e03260
 #define XTS_ID_APP_DECIM            0x9bb3a2c6
 #define XTS_ID_APP_PRESENCE_2       0x014d4ab8
+#define XTS_ID_APP_PRESENCE_3       0x114d4ab8
+#define XTS_ID_APP_HIGHBAY_1        0xd0f2862d
 #define XTS_ID_APP_RADAR            0x57dabf09
 
 // Profile data and feature IDs
@@ -35,7 +39,13 @@ extern "C" {
 #define XTS_ID_NOISEMAP_FLOAT                           0x00000012
 #define XTS_ID_NOISEMAP_BYTE                            0x00000013
 #define XTS_ID_RESPIRATION_MOVINGLIST                   0x610a3b00
+#define XTS_ID_RESPIRATION_MOVEMENTLIST                 0x610a3b00
 #define XTS_ID_RESPIRATION_DETECTIONLIST                0x610a3b02
+#define XTS_ID_RESPIRATION_NORMALIZEDMOVEMENTLIST       0xC3A331CF
+#define XTS_ID_VITAL_SIGNS                              0x20020102
+#define XTS_ID_SLEEPSTAGE                               0x41083A02
+#define XTS_ID_TX_CENTER_FREQ                           0x71AF2A2B
+#define XTS_ID_LED_CONTROL                              0x71AF2A2C
 
 // System Info Code definitions
 #define XTID_SSIC_ITEMNUMBER         (0x00)
@@ -45,6 +55,8 @@ extern "C" {
 #define XTID_SSIC_BUILD              (0x04)
 #define XTID_SSIC_SERIALNUMBER       (0x06)
 #define XTID_SSIC_VERSIONLIST        (0x07)
+#define XTID_SSIC_SYSTEMCOREID       (0x08)
+#define XTID_SSIC_BOOTLOADER         (0x09)
 
 // Sensor mode IDs
 #define XTID_SM_RUN                  (0x01)
@@ -53,6 +65,10 @@ extern "C" {
 #define XTID_SM_MANUAL               (0x12)
 #define XTID_SM_STOP                 (0x13)
 
+// Frame Inject mode IDs
+#define XTID_FIM_LOOP                (0x01)
+#define XTID_FIM_SEQUENTIAL          (0x02)
+#define XTID_FIM_SINGLE              (0x03)
 
 #define XTID_BAUDRATE_9600	     9600
 #define XTID_BAUDRATE_19200	     19200
@@ -74,21 +90,24 @@ extern "C" {
 #define XTID_IOPIN_SETUP_OUTPUT        (1)
 #define XTID_IOPIN_SETUP_PUSH_PULL     (2)
 #define XTID_IOPIN_SETUP_INVERTED      (4)
+#define XTID_IOPIN_SETUP_PULLUP        (8)
 
 #define XTID_IOPIN_FEATURE_DISABLE     (0)
 #define XTID_IOPIN_FEATURE_DEFAULT     (1)
 #define XTID_IOPIN_FEATURE_PASSIVE     (2)
 #define XTID_IOPIN_FEATURE_PRESENCE    (3)
-#define XTID_IOPIN_FEATURE_LAST        (3)
+#define XTID_IOPIN_FEATURE_MOVEMENT    (4)
+#define XTID_IOPIN_FEATURE_BREATHING   (5)
+#define XTID_IOPIN_FEATURE_LAST        (5)
 
 // Output control
 #define XTID_OUTPUT_CONTROL_DISABLE    (0)
 #define XTID_OUTPUT_CONTROL_ENABLE     (1)
+#define XTID_OUTPUT_CONTROL_DEBUG      (1<<31)
 
 // PD output control (bitfield)
-#define XTID_OUTPUT_CONTROL_PD_OFF     (0)
-#define XTID_OUTPUT_CONTROL_PD_SLOW    (1)
-#define XTID_OUTPUT_CONTROL_PD_FAST    (2)
+#define XTID_OUTPUT_CONTROL_PD_SLOW_ENABLE    (1)
+#define XTID_OUTPUT_CONTROL_PD_FAST_ENABLE    (2)
 
 // Noisemap control (bitfield)
 #define XTID_NOISEMAP_CONTROL_DISABLE       (0)
@@ -101,19 +120,24 @@ extern "C" {
 #define XTID_LED_MODE_SIMPLE    (1)
 #define XTID_LED_MODE_FULL      (2)
 
+// Center Frequency
+#define XTID_CENTER_FREQ_LOWBAND    (3)
+#define XTID_CENTER_FREQ_HIGHBAND   (4)
+
 
 // Serial protocol IDs
 #define XTID_MCP_ERROR_NOT_RECOGNIZED   (1)
 
 
 // Profile codes
-#define XTS_VAL_RESP_STATE_BREATHING			0x00 // Valid RPM sensing
-#define XTS_VAL_RESP_STATE_MOVEMENT				0x01 // Detects motion, but can not identify breath
-#define XTS_VAL_RESP_STATE_MOVEMENT_TRACKING	0x02 // Detects motion, possible breathing soon
-#define XTS_VAL_RESP_STATE_NO_MOVEMENT			0x03 // No movement detected
-#define XTS_VAL_RESP_STATE_INITIALIZING			0x04 // Initializing sensor
-#define XTS_VAL_RESP_STATE_ERROR				0x05 // Sensor has detected some problem. StatusValue indicates problem.
-#define XTS_VAL_RESP_STATE_UNKNOWN				0x06 // Undefined state.
+#define XTS_VAL_RESP_STATE_BREATHING				0x00 // Valid RPM sensing
+#define XTS_VAL_RESP_STATE_MOVEMENT					0x01 // Detects motion, but can not identify breath
+#define XTS_VAL_RESP_STATE_MOVEMENT_TRACKING		0x02 // Detects motion, possible breathing soon
+#define XTS_VAL_RESP_STATE_NO_MOVEMENT				0x03 // No movement detected
+#define XTS_VAL_RESP_STATE_INITIALIZING				0x04 // Initializing sensor
+#define XTS_VAL_RESP_STATE_ERROR					0x05 // Sensor has detected some problem. StatusValue indicates problem.
+#define XTS_VAL_RESP_STATE_UNKNOWN					0x06 // Undefined state.
+#define XTS_VAL_RESP_STATE_HEART_RATE_AND_BREATHING	0x07 // Heart rate and beathing
 
 #define XTS_VAL_PRESENCE_PRESENCESTATE_NO_PRESENCE      0 // No presence detected
 #define XTS_VAL_PRESENCE_PRESENCESTATE_PRESENCE         1 // Presence detected
