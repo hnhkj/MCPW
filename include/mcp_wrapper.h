@@ -79,6 +79,7 @@ int mcpw_get_systeminfo(mcp_wrapper_t *mcpw, uint8_t info_code, char * result, u
 int mcpw_store_noisemap(mcp_wrapper_t *mcpw); 
 int mcpw_set_noisemap_control(mcp_wrapper_t *mcpw, uint32_t noisemap_control);
 int mcpw_set_baudrate(mcp_wrapper_t *mcpw, uint32_t baudrate);
+int mcpw_system_run_test(mcp_wrapper_t *mcpw, uint8_t testcode);
 int mcpw_reset_to_factory_preset(mcp_wrapper_t *mcpw);
 
 

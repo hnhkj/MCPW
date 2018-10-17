@@ -344,6 +344,41 @@ int mcpw_demo_x4m200(char* com_port)
 	return 0;
 }
 
+int mcpw_demo_x4m200_test(char* com_port, uint8_t testcode)
+{
+	cout << "Starting mcpw_demo_x4m200." << endl;
+
+	ModuleIo *moduleIo = createModuleIo();
+	if (0 != moduleIo->open(com_port))
+	{
+		cout << "Error opening " << com_port << ". Aborting." << endl;
+		return -1;
+	}
+
+	cout << "Connecting to XeThru module on " << com_port << "." << endl;
+
+	// Configure MCPW.
+	uint32_t mcpw_instance_memory_size = mcpw_get_instance_size();
+	void *mcpw_instance_memory = malloc(mcpw_instance_memory_size);
+	mcp_wrapper_t* mcpw = mcpw_init(mcpw_instance_memory);
+	mcpw->send_bytes = mcpw_send_bytes;
+	mcpw->wait_for_response = mcpw_wait_for_response;
+	mcpw->response_ready = mcpw_response_ready;
+	mcpw->delay = mcpw_delay;
+	mcpw->mcp_host_parser->sleep = mcpw_on_host_parser_sleep; // X4M200 sleep message
+	mcpw->mcp_host_parser->respiration = mcpw_on_host_parser_respiration; // X4M200 legacy respiration message (original X2M200 resp message)
+	mcpw->mcp_host_parser->respiration_movinglist = mcpw_on_host_parser_respiration_moving_list; // X4M200 movinglist message
+	mcpw->mcp_host_parser->baseband_ap = mcpw_on_host_parser_baseband_ap; // X4M200 baseband AP message
+	mcpw->user_reference = (void*)moduleIo;
+
+	cout << "Starting serial port read thread." << endl;
+	std::thread readThread(readThreadMethod, mcpw);
+
+	mcpw_set_sensor_mode(mcpw, XTS_SM_STOP, 0);
+	mcpw_system_run_test(mcpw, testcode);
+	cout << "test mode start!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+	while (1);
+}
 
 int mcpw_demo_x2m200(char* com_port)
 {
@@ -472,6 +507,11 @@ int main(int argc, char *argv[])
 	if ((argc == 4) && (strcmp(argv[2], "upgrade")==0) && (strcmp(argv[3], "x4m300") == 0))
 	{
 		return mcpw_demo_upgrade_x4m300(com_port);
+	}
+
+	if ((argc == 3) && (strcmp(argv[2], "test") == 0))
+	{
+		return mcpw_demo_x4m200_test(com_port, 0x1F);
 	}
 
 	if (argc == 3)
