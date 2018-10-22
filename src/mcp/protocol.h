@@ -85,6 +85,13 @@ int createSetDetectionZoneCommand(
     AppendCallback callback,
     void * user_data);
 
+int createSetApplicationUserZoneCommand(
+    float start,
+    float end,
+    AppendCallback callback,
+    void *user_data);
+
+
 int createSetSensitivityCommand(
     const uint32_t sensitivity,
     AppendCallback callback,

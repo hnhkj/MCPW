@@ -273,6 +273,19 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                     return 0;
                 }
             }
+            if (app_command_object == XTS_ID_APPLICATION_USER_ZONE)
+            {
+                float start, end;
+                start = extract_float(data, &index);
+                end = extract_float(data, &index);
+
+                // Send to application layer.
+                if (mcp_parser->onMcpProfileSetApplicationUserZone)
+                {
+                    mcp_parser->onMcpProfileSetApplicationUserZone(start, end, mcp_parser->user_data);
+                    return 0;
+                }
+            }
             if (app_command_object == XTS_ID_SENSITIVITY)
             {
                 uint32_t sensitivity = extract_uint32(data, &index);
@@ -325,6 +338,14 @@ int mcpParseMessage(McpParser_t* mcp_parser, const uint8_t* data, uint32_t lengt
                 if (mcp_parser->onMcpProfileGetDetectionZone)
                 {
                     mcp_parser->onMcpProfileGetDetectionZone(mcp_parser->user_data);
+                    return 0;
+                }
+            }
+            else if (app_command_object == XTS_ID_APPLICATION_USER_ZONE)
+            {
+                if (mcp_parser->onMcpProfileGetApplicationUserZone)
+                {
+                    mcp_parser->onMcpProfileGetApplicationUserZone(mcp_parser->user_data);
                     return 0;
                 }
             }

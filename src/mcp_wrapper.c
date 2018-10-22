@@ -364,6 +364,26 @@ int mcpw_set_detection_zone(mcp_wrapper_t *mcpw, float start, float end)
     return ret;
 }
 
+int mcpw_set_application_user_zone(mcp_wrapper_t *mcpw, float start, float end)
+{
+	if (!mcpw_start_send(mcpw))
+		return MCPW_ERROR;
+	if (!mcpw->send_bytes)
+		return MCPW_ERROR;
+	createSetApplicationUserZoneCommand(start, end, mcpw->on_mcp_messagebuild, (void *)mcpw);
+	mcpw->send_bytes(mcpw);
+	if (!mcpw->wait_for_response(mcpw->default_timeout))
+	{
+		mcpw->busy = false;
+		return MCPW_ERROR_TIMEOUT;
+	}
+	int ret = MCPW_ERROR;
+	if ((mcpw->sync_response_length == 1) && (mcpw->sync_response[0] == XTS_SPR_ACK))
+		ret = MCPW_OK;
+	mcpw->busy = false;
+	return ret;
+}
+
 int mcpw_set_led_control(mcp_wrapper_t *mcpw, uint8_t mode, uint8_t intensity)
 {
 	if (!mcpw_start_send(mcpw)) return MCPW_ERROR;
