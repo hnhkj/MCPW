@@ -341,8 +341,23 @@ int mcpw_demo_x4m200(char *com_port)
 	moduleIo->setBaudrate(XTID_BAUDRATE_921600);
 #endif
 	mcpw_set_sensor_mode(mcpw, XTS_SM_STOP, 0);
+
+
 	if (MCPW_OK != mcpw_load_profile(mcpw, XTS_ID_APP_RESPIRATION_4))
 		cout << "mcpw_load_profile failed." << endl;
+
+    // Read module info
+	char system_info[256]="hello";
+	int status = mcpw_get_systeminfo(mcpw, XTID_SSIC_VERSION, system_info, sizeof(system_info));
+	if (MCPW_OK == status){
+         cout << "XTID_SSIC_FIRMWAREID: " << system_info << endl;
+	}
+	else	cout << "mcpw_get_systeminfo failed:" << status << endl;
+	if (MCPW_OK == mcpw_get_systeminfo(mcpw, XTID_SSIC_VERSION, system_info, sizeof(system_info))){
+         cout << "XTID_SSIC_VERSION: " << system_info << endl;
+	}
+	else	cout << "mcpw_get_systeminfo failed." << endl;
+
 	if (MCPW_OK != mcpw_set_noisemap_control(mcpw, 6))
 		cout << "mcpw_set_noisemap_control failed." << endl;
 	if (MCPW_OK != mcpw_set_detection_zone(mcpw, 0.5, 3))
