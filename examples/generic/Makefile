@@ -6,9 +6,9 @@ GCC = gcc
 
 #-Wall #-Werror
 
-GXX_FLAGS += --std=gnu++11
+GXX_FLAGS += --std=gnu++11 -O0 -g3
 
-C_FLAGS = -Wno-unused-variable
+C_FLAGS = -Wno-unused-variable -O0 -g3
 
 INCLUDES += -I../../include/
 INCLUDES += -I../../src/

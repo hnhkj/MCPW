@@ -204,6 +204,7 @@ void readThreadMethod(mcp_wrapper_t *mcpw)
 	ModuleIo *moduleIo = (ModuleIo *)mcpw->user_reference;
 	const int rx_buffer_length = 100;
 	unsigned char rx_buffer[rx_buffer_length];
+	FILE *fd = fopen("in_log.bin", "w");
 
 	for (;;)
 	{
@@ -214,6 +215,8 @@ void readThreadMethod(mcp_wrapper_t *mcpw)
 		if (received <= 0)
 			continue;
 
+		fwrite(rx_buffer, 1, received, fd);
+		fflush(fd);
 		mcpw_process_rx_data(mcpw, rx_buffer, received);
 		//cout << "Read " << read << " bytes" << endl;
 	}
@@ -338,11 +341,11 @@ int mcpw_demo_x4m200(char *com_port)
 	moduleIo->setBaudrate(XTID_BAUDRATE_921600);
 #endif
 	mcpw_set_sensor_mode(mcpw, XTS_SM_STOP, 0);
-	if (MCPW_OK != mcpw_load_profile(mcpw, XTS_ID_APP_RESPIRATION_2))
+	if (MCPW_OK != mcpw_load_profile(mcpw, XTS_ID_APP_RESPIRATION_4))
 		cout << "mcpw_load_profile failed." << endl;
-	if (MCPW_OK != mcpw_set_noisemap_control(mcpw, XTID_NOISEMAP_CONTROL_ENABLE | XTID_NOISEMAP_CONTROL_ADAPTIVE))
+	if (MCPW_OK != mcpw_set_noisemap_control(mcpw, 6))
 		cout << "mcpw_set_noisemap_control failed." << endl;
-	if (MCPW_OK != mcpw_set_detection_zone(mcpw, 0.5, 3.5))
+	if (MCPW_OK != mcpw_set_detection_zone(mcpw, 0.5, 3))
 		cout << "mcpw_set_detection_zone failed." << endl;
 	if (MCPW_OK != mcpw_set_sensitivity(mcpw, 9))
 		cout << "mcpw_set_sensitivity failed." << endl;
@@ -356,7 +359,7 @@ int mcpw_demo_x4m200(char *com_port)
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_RESPIRATION_MOVINGLIST, XTID_OUTPUT_CONTROL_DISABLE))
 		cout << "mcpw_set_output_control(XTS_ID_RESPIRATION_MOVINGLIST) failed." << endl;
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_RESPIRATION_NORMALIZEDMOVEMENTLIST, XTID_OUTPUT_CONTROL_ENABLE))
-		cout << "mcpw_set_output_control(XTS_ID_RESPIRATION_MOVINGLIST) failed." << endl;
+		cout << "mcpw_set_output_control(XTS_ID_RESPIRATION_NORMALIZEDMOVEMENTLIST) failed." << endl;
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_BASEBAND_AMPLITUDE_PHASE, XTID_OUTPUT_CONTROL_DISABLE))
 		cout << "mcpw_set_output_control(XTS_ID_BASEBAND_AMPLITUDE_PHASE) failed." << endl;
 	// Start module execution.
@@ -367,9 +370,12 @@ int mcpw_demo_x4m200(char *com_port)
 	for (;;)
 	{
 		// Every 30 minutes, store noisemap.
-		std::this_thread::sleep_for(std::chrono::minutes(30));
+		std::this_thread::sleep_for(std::chrono::seconds(30));
 		res = mcpw_store_noisemap(mcpw);
 		cout << "Store noisemap " << (res == MCPW_OK ? "succeeded" : "failed") << "." << endl;
+		if (MCPW_OK != mcpw_set_application_user_zone(mcpw, 0.5, 2))
+		cout << "mcpw_set_application_user_zone failed." << endl;
+		else cout << "mcpw_set_application_user_zone sucess." << endl;
 	}
 	readThread.join();
 
