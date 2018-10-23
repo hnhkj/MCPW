@@ -82,8 +82,8 @@ bool mcpw_start_send(mcp_wrapper_t *mcpw)
 mcp_wrapper_t * mcpw_init(void *instance_memory)
 {
 	mcp_wrapper_t * mcpw = (mcp_wrapper_t*)instance_memory;
-	void* protocol_instance_memory = (int)(void*)mcpw + sizeof(mcp_wrapper_t); // Place protocol instance right after mcp_wrapper struct in already alocated memory provided.
-	void* mcp_host_parser_instance_memory = (int)(void*)protocol_instance_memory + getInstanceSize();
+	void* protocol_instance_memory = (void*)((char*)mcpw + sizeof(mcp_wrapper_t)); // Place protocol instance right after mcp_wrapper struct in already alocated memory provided.
+	void* mcp_host_parser_instance_memory = (void*)((char*)protocol_instance_memory + getInstanceSize());
 	mcpw->mcp = createApplicationProtocol(
 		&mcpw_mcp_handle_protocol_packet,
 		&mcpw_mcp_handle_protocol_error,
