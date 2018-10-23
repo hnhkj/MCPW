@@ -839,6 +839,10 @@ extern "C"
         {
             return parse_pong(parser, data, length, user_data);
         }
+        else if (data[offset] == XTS_SPR_REPLY)
+        {
+            return parse_reply(parser, data, length, user_data);
+        }
         else if (data[offset] == XTS_SPR_DATA)
         {
             return parse_data(parser, data, length, user_data);
