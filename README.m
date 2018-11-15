@@ -1,4 +1,16 @@
-# MCP Wrapper changelog
+# Document
+
+Module Communication Protocol Wrapper - MCPW
+""""""""""""""""""""""""""""""""""""""""""""
+Open documentation: doc/output/html/index.xhtml
+
+# Changelog
+
+## 1.3.3
+-- add mcpw_get_detection_zone function
+
+## 1.3.2
+-- add mcpw_set_application_user_zone function
 
 ## 1.3.1
 - add system_run_test function for certification mode selection

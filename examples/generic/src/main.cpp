@@ -342,28 +342,38 @@ int mcpw_demo_x4m200(char *com_port)
 #endif
 	mcpw_set_sensor_mode(mcpw, XTS_SM_STOP, 0);
 
-
 	if (MCPW_OK != mcpw_load_profile(mcpw, XTS_ID_APP_RESPIRATION_4))
 		cout << "mcpw_load_profile failed." << endl;
 
-    // Read module info
-	char system_info[256]="hello";
+	// Read module info
+	char system_info[256] = "";
 	int status = mcpw_get_systeminfo(mcpw, XTID_SSIC_VERSION, system_info, sizeof(system_info));
-	if (MCPW_OK == status){
-         cout << "XTID_SSIC_FIRMWAREID: " << system_info << endl;
+	if (MCPW_OK == status)
+	{
+		cout << "XTID_SSIC_FIRMWAREID: " << system_info << endl;
 	}
-	else	cout << "mcpw_get_systeminfo failed:" << status << endl;
-	if (MCPW_OK == mcpw_get_systeminfo(mcpw, XTID_SSIC_VERSION, system_info, sizeof(system_info))){
-         cout << "XTID_SSIC_VERSION: " << system_info << endl;
+	else
+		cout << "mcpw_get_systeminfo failed:" << status << endl;
+	if (MCPW_OK == mcpw_get_systeminfo(mcpw, XTID_SSIC_VERSION, system_info, sizeof(system_info)))
+	{
+		cout << "XTID_SSIC_VERSION: " << system_info << endl;
 	}
-	else	cout << "mcpw_get_systeminfo failed." << endl;
+	else
+		cout << "mcpw_get_systeminfo failed." << endl;
 
 	if (MCPW_OK != mcpw_set_noisemap_control(mcpw, 6))
 		cout << "mcpw_set_noisemap_control failed." << endl;
 	if (MCPW_OK != mcpw_set_detection_zone(mcpw, 0.5, 3))
 		cout << "mcpw_set_detection_zone failed." << endl;
-	if (MCPW_OK != mcpw_set_sensitivity(mcpw, 9))
-		cout << "mcpw_set_sensitivity failed." << endl;
+	float start, end;
+	if (MCPW_OK == mcpw_get_detection_zone(mcpw, &start, &end))
+	{
+		printf("Detection zone: %f, %f\n", start, end);
+	}
+	else
+	{
+		cout << "mcpw_set_detection_zone failed." << endl;
+	}
 	if (MCPW_OK != mcpw_set_led_control(mcpw, XTID_LED_MODE_FULL, 100))
 		cout << "mcpw_set_led_control failed." << endl;
 	// Methods to turn on or off module data messages. Select _ENABLE or _DISABLE.
@@ -385,12 +395,9 @@ int mcpw_demo_x4m200(char *com_port)
 	for (;;)
 	{
 		// Every 30 minutes, store noisemap.
-		std::this_thread::sleep_for(std::chrono::seconds(30));
+		std::this_thread::sleep_for(std::chrono::minutes(30));
 		res = mcpw_store_noisemap(mcpw);
 		cout << "Store noisemap " << (res == MCPW_OK ? "succeeded" : "failed") << "." << endl;
-		if (MCPW_OK != mcpw_set_application_user_zone(mcpw, 0.5, 2))
-		cout << "mcpw_set_application_user_zone failed." << endl;
-		else cout << "mcpw_set_application_user_zone sucess." << endl;
 	}
 	readThread.join();
 
