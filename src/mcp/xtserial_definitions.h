@@ -45,8 +45,10 @@ typedef enum serial_protocol_command_en
     XTS_SPC_MOD_SETCOM          = 0x23,
     XTS_SPC_MOD_SETLEDCONTROL   = 0x24,
     XTS_SPC_MOD_NOISEMAP        = 0x25,
+    XTS_SPC_MOD_GETMODE         = 0x26,    
     XTS_SPC_IOPIN               = 0x40,
     XTS_SPC_OUTPUT              = 0x41,
+    XTS_SPC_DEBUG_OUTPUT        = 0x42,
     XTS_SPC_X4DRIVER            = 0x50,
     XTS_SPC_DIR_COMMAND         = 0x90,
     XTS_SPC_HIL                 = 0xa0,
@@ -63,6 +65,7 @@ typedef enum serial_protocol_appcommand_en
     XTS_SPCA_STORE_NOISEMAP = 0x13,
     XTS_SPCA_LOAD_NOISEMAP  = 0x14,
     XTS_SPCA_GET_PARAMETER_FILE = 0x15,
+    XTS_SPCA_DELETE_NOISEMAP = 0x16,
     XTS_SPCA_POLL           = 0x20
 } serial_protocol_appcommand_t;
 
@@ -95,6 +98,7 @@ typedef enum serial_protocol_response_errorcode_en
     XTS_SPRE_BUSY,
     XTS_SPRE_APP_INVALID        = 0x20,
     XTS_SPRE_COMMAND_FAILED     = 0x21,
+    XTS_SPRE_RESTARTING         = 0x22,
     XTS_SPRE_USER               = 0xa0
 } serial_protocol_response_errorcode_t;
 
@@ -153,6 +157,8 @@ typedef enum sensor_direct_command_en
     XTS_SDC_OPEN_FILE               = 0x72,
     XTS_SDC_FORMAT_FILESYSTEM       = 0x73,
     XTS_SDC_GET_PROFILEID           = 0x74,
+    XTS_SDC_INJECT_FRAME            = 0x75,
+    XTS_SDC_PREPARE_INJECT_FRAME    = 0x76,    
     XTS_SDC_SYSTEM_LAST,
 
     // Messages routed to processing task.
@@ -220,6 +226,7 @@ typedef enum serial_protocol_command_x4driver_id_en
     XTS_SPCXI_PIFREGISTER         = 0x23,
     XTS_SPCXI_XIFREGISTER         = 0x24,
     XTS_SPCXI_PRFDIV              = 0x25,
+    XTS_SPCXI_FRAMEBINCOUNT       = 0x26,
 } serial_protocol_command_x4driver_id_t;
 
 
@@ -295,7 +302,11 @@ typedef enum serial_system_test_code_en
     XTS_SSTC_TEST_X4_CONN       = 0x19,
     XTS_SSTC_TEST_CERT_MODE_EN  = 0x1A,
     XTS_SSTC_TEST_CERT_MODE_DIS = 0x1B,
-    XTS_SSTC_TEST_LAST          = 0x1B
+    XTS_SSTC_TEST_HW_CONFIG     = 0x1C,
+    XTS_SSTC_TEST_CERT_TX_ONLY  = 0x1D,
+    XTS_SSTC_TEST_CERT_TX_ONLY_TX_OFF   = 0x1E,
+    XTS_SSTC_TEST_CERT_STREAM_TX_OFF    = 0x1F,
+    XTS_SSTC_TEST_LAST          = 0x1F
 
 } serial_system_test_code_t;
 

@@ -6,6 +6,10 @@ Open documentation: doc/output/html/index.xhtml
 
 # Changelog
 
+## 1.3.4
+-- update protocol.c protocol.h xtserial_definitions.h from XEP 3.4.7 to support more get funtions
+-- add git ignore file
+
 ## 1.3.3
 -- add mcpw_get_detection_zone function
 

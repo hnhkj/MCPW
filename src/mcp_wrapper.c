@@ -516,6 +516,52 @@ int mcpw_get_detection_zone(mcp_wrapper_t *mcpw, float *start, float *end)
 	return ret;
 }
 
+int mcpw_get_sensitivity(mcp_wrapper_t *mcpw, uint32_t *sensitivity)
+{
+	if (!mcpw_start_send(mcpw))
+		return MCPW_ERROR;
+	if (!mcpw->send_bytes)
+		return MCPW_ERROR;
+	createGetSensitivityCommand(mcpw->on_mcp_messagebuild, (void *)mcpw);
+	mcpw->send_bytes(mcpw);
+	if (!mcpw->wait_for_response(mcpw->default_timeout))
+	{
+		mcpw->busy = false;
+		return MCPW_ERROR_TIMEOUT;
+	}
+	int ret = MCPW_ERROR;
+	if (mcpw->sync_response[0] == XTS_SPR_REPLY)
+	{
+		memcpy(sensitivity, mcpw->reply.data, sizeof(uint32_t));
+		ret = MCPW_OK;
+	}
+	mcpw->busy = false;
+	return ret;
+}
+
+int mcpw_get_led_control(mcp_wrapper_t *mcpw, uint8_t *led_control)
+{
+	if (!mcpw_start_send(mcpw))
+		return MCPW_ERROR;
+	if (!mcpw->send_bytes)
+		return MCPW_ERROR;
+	createGetLedControlCommand(mcpw->on_mcp_messagebuild, (void *)mcpw);
+	mcpw->send_bytes(mcpw);
+	if (!mcpw->wait_for_response(mcpw->default_timeout))
+	{
+		mcpw->busy = false;
+		return MCPW_ERROR_TIMEOUT;
+	}
+	int ret = MCPW_ERROR;
+	if (mcpw->sync_response[0] == XTS_SPR_REPLY)
+	{
+		memcpy(led_control, mcpw->reply.data, sizeof(uint32_t));
+		ret = MCPW_OK;
+	}
+	mcpw->busy = false;
+	return ret;
+}
+
 int mcpw_store_noisemap(mcp_wrapper_t *mcpw)
 {
 	if (!mcpw_start_send(mcpw))
