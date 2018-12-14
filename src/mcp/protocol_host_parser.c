@@ -6,15 +6,26 @@ extern "C"
 #endif
 
 #include <stdio.h>
+#include <string.h>
 
     static uint32_t bytes_to_uint32(const unsigned char *data)
     {
-        return *(const uint32_t *)(data);
+        union {
+            uint32_t ui;
+            unsigned char c[sizeof(uint32_t)];
+        } u;
+        memcpy(u.c, data, sizeof(uint32_t));
+        return u.ui;
     }
 
     static float bytes_to_float(const unsigned char *data)
     {
-        return *(const float *)(data);
+        union {
+            float f;
+            char c[sizeof(float)];
+        } u;
+        memcpy(u.c, data, sizeof(float));
+        return u.f;
     }
 
     static void default_pong_callback(uint32_t pong, void *user_data)
@@ -48,6 +59,16 @@ extern "C"
         (void)user_data;
     }
     static void default_sleep_callback(SleepData rd, void *user_data)
+    {
+        (void)rd;
+        (void)user_data;
+    }
+    static void default_vitalsigns_callback(VitalSignsData rd, void *user_data)
+    {
+        (void)rd;
+        (void)user_data;
+    }
+    static void default_sleepstage_callback(SleepStageData rd, void *user_data)
     {
         (void)rd;
         (void)user_data;
@@ -102,6 +123,8 @@ extern "C"
         parser->data_float = default_datafloat_callback;
         parser->respiration = default_respiration_callback;
         parser->sleep = default_sleep_callback;
+        parser->vitalsigns = default_vitalsigns_callback;
+        parser->sleepstage = default_sleepstage_callback;
         parser->baseband_ap = default_baseband_ap_callback;
         parser->baseband_iq = default_baseband_iq_callback;
         parser->presence_single = default_presence_single;
@@ -109,7 +132,7 @@ extern "C"
         parser->system_status = default_system_status;
         parser->respiration_movinglist = default_respiration_movinglist;
         parser->respiration_detectionlist = default_respiration_detectionlist;
-        parser->respiration_normalized_movinglist = default_respiration_normalizedmovementlist;
+        parser->respiration_normalizedmovementlist = default_respiration_normalizedmovementlist;
     }
 
     int parse_error(
@@ -569,6 +592,94 @@ extern "C"
         parser->sleep(sd, user_data);
         return 0;
     }
+    int parse_vitalsigns_status(
+        HostParser *parser,
+        const unsigned char *data,
+        unsigned int length,
+        void *user_data)
+    {
+        if (!length)
+        {
+            parser->error(ERROR_NO_DATA, user_data);
+            return ERROR_NO_DATA;
+        }
+
+        unsigned int offset = 1;
+        const uint32_t appdata_id = bytes_to_uint32(&data[offset]);
+        if (appdata_id != XTS_ID_VITAL_SIGNS)
+        {
+            parser->error(ERROR_WRONG_CONTENT, user_data);
+            return 1;
+        }
+        offset = 1 + 4;
+        if (length < sizeof(VitalSignsData))
+        {
+            parser->error(ERROR_SHORT_DATA, user_data);
+            return 1;
+        }
+
+        VitalSignsData sd;
+        sd.frame_counter = bytes_to_uint32(&data[offset]);
+        offset += sizeof(sd.frame_counter);
+        sd.sensor_state = bytes_to_uint32(&data[offset]);
+        offset += sizeof(sd.sensor_state);
+        sd.respiration_rate = bytes_to_float(&data[offset]);
+        offset += sizeof(sd.respiration_rate);
+        sd.respiration_distance = bytes_to_float(&data[offset]);
+        offset += sizeof(sd.respiration_distance);
+        sd.respiration_confidence = bytes_to_float(&data[offset]);
+        offset += sizeof(sd.respiration_confidence);
+        sd.heart_rate = bytes_to_float(&data[offset]);
+        offset += sizeof(sd.heart_rate);
+        sd.heart_distance = bytes_to_float(&data[offset]);
+        offset += sizeof(sd.heart_distance);
+        sd.heart_confidence = bytes_to_float(&data[offset]);
+        offset += sizeof(sd.heart_confidence);
+        sd.normalized_movement_slow = bytes_to_float(&data[offset]);
+        offset += sizeof(sd.normalized_movement_slow);
+        sd.normalized_movement_fast = bytes_to_float(&data[offset]);
+        offset += sizeof(sd.normalized_movement_fast);
+        sd.normalized_movement_start = bytes_to_float(&data[offset]);
+        offset += sizeof(sd.normalized_movement_start);
+        sd.normalized_movement_end = bytes_to_float(&data[offset]);
+        offset += sizeof(sd.normalized_movement_end);
+        parser->vitalsigns(sd, user_data);
+        return 0;
+    }
+    int parse_sleepstage_status(
+        HostParser *parser,
+        const unsigned char *data,
+        unsigned int length,
+        void *user_data)
+    {
+        if (!length)
+        {
+            parser->error(ERROR_NO_DATA, user_data);
+            return ERROR_NO_DATA;
+        }
+
+        unsigned int offset = 1;
+        const uint32_t appdata_id = bytes_to_uint32(&data[offset]);
+        if (appdata_id != XTS_ID_SLEEPSTAGE)
+        {
+            parser->error(ERROR_WRONG_CONTENT, user_data);
+            return 1;
+        }
+        offset = 1 + 4;
+        if (length < sizeof(SleepStageData))
+        {
+            parser->error(ERROR_SHORT_DATA, user_data);
+            return 1;
+        }
+
+        SleepStageData sd;
+        sd.frame_counter = bytes_to_uint32(&data[offset]);
+        offset += sizeof(sd.frame_counter);
+        sd.sleepstage = bytes_to_uint32(&data[offset]);
+        offset += sizeof(sd.sleepstage);
+        parser->sleepstage(sd, user_data);
+        return 0;
+    }
 
     int parse_respiration_status(
         HostParser *parser,
@@ -637,6 +748,16 @@ extern "C"
             return parse_sleep_status(parser, data, length, user_data);
         }
 
+        if (appdata_id == XTS_ID_VITAL_SIGNS)
+        {
+            return parse_vitalsigns_status(parser, data, length, user_data);
+        }
+
+        if (appdata_id == XTS_ID_SLEEPSTAGE)
+        {
+            return parse_sleepstage_status(parser, data, length, user_data);
+        }
+
         if (appdata_id == XTS_ID_BASEBAND_AMPLITUDE_PHASE)
         {
             return parse_baseband_ap(parser, data, length, user_data);
@@ -663,7 +784,6 @@ extern "C"
         {
             return parse_respiration_normalizedmovementlist(parser, data, length, user_data);
         }
-
         return PARSE_OK;
     }
 
@@ -813,8 +933,176 @@ extern "C"
             ;
         }
 
-        parser->respiration_normalized_movinglist(result, user_data);
+        parser->respiration_normalizedmovementlist(result, user_data);
         return 0;
+    }
+
+    int parse_pulsedoppler_float(
+        HostParser *parser,
+        const unsigned char *data,
+        unsigned int length,
+        void *user_data)
+    {
+        if (!length)
+        {
+            parser->error(ERROR_NO_DATA, user_data);
+            return ERROR_NO_DATA;
+        }
+
+        unsigned int offset = 0;
+        if (data[offset] != XTS_SPR_APPDATA)
+        {
+            parser->error(ERROR_WRONG_CONTENT, user_data);
+            return ERROR_WRONG_CONTENT;
+        }
+
+        offset = 1;
+        const uint32_t appdata_id = bytes_to_uint32(&data[offset]);
+        if (appdata_id != XTS_ID_PULSEDOPPLER_FLOAT &&
+            appdata_id != XTS_ID_NOISEMAP_FLOAT)
+        {
+            parser->error(ERROR_WRONG_CONTENT, user_data);
+            return ERROR_WRONG_CONTENT;
+        }
+
+        if (length < sizeof(PulseDopplerFloatData))
+        {
+            parser->error(ERROR_SHORT_DATA, user_data);
+            return ERROR_SHORT_DATA;
+        }
+
+        PulseDopplerFloatData pdf;
+        offset += sizeof(appdata_id);
+        pdf.frame_counter = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdf.frame_counter);
+
+        pdf.matrix_counter = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdf.matrix_counter);
+
+        pdf.range_idx = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdf.range_idx);
+
+        pdf.range_bins = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdf.range_bins);
+
+        pdf.frequency_count = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdf.frequency_count);
+
+        pdf.pulsedoppler_instance = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdf.pulsedoppler_instance);
+
+        pdf.fps = bytes_to_float(&data[offset]);
+        offset += sizeof(pdf.fps);
+
+        pdf.fps_decimated = bytes_to_float(&data[offset]);
+        offset += sizeof(pdf.fps_decimated);
+
+        pdf.frequency_start = bytes_to_float(&data[offset]);
+        offset += sizeof(pdf.frequency_start);
+
+        pdf.frequency_step = bytes_to_float(&data[offset]);
+        offset += sizeof(pdf.frequency_step);
+
+        pdf.range = bytes_to_float(&data[offset]);
+        offset += sizeof(pdf.range);
+
+        if (length != offset + pdf.frequency_count * sizeof(float))
+        {
+            parser->error(ERROR_SHORT_DATA, user_data);
+            return ERROR_SHORT_DATA;
+        }
+
+        pdf.data = (const float *)(&data[offset]);
+
+        parser->pulsedoppler_float(pdf, user_data);
+        return PARSE_OK;
+    }
+
+    int parse_pulsedoppler_byte(
+        HostParser *parser,
+        const unsigned char *data,
+        unsigned int length,
+        void *user_data)
+    {
+        if (!length)
+        {
+            parser->error(ERROR_NO_DATA, user_data);
+            return ERROR_NO_DATA;
+        }
+
+        unsigned int offset = 0;
+        if (data[offset] != XTS_SPR_APPDATA)
+        {
+            parser->error(ERROR_WRONG_CONTENT, user_data);
+            return ERROR_WRONG_CONTENT;
+        }
+
+        offset = 1;
+        const uint32_t appdata_id = bytes_to_uint32(&data[offset]);
+        if (appdata_id != XTS_ID_PULSEDOPPLER_BYTE &&
+            appdata_id != XTS_ID_NOISEMAP_BYTE)
+        {
+            parser->error(ERROR_WRONG_CONTENT, user_data);
+            return ERROR_WRONG_CONTENT;
+        }
+
+        if (length < sizeof(PulseDopplerFloatData))
+        {
+            parser->error(ERROR_SHORT_DATA, user_data);
+            return ERROR_SHORT_DATA;
+        }
+
+        PulseDopplerByteData pdb;
+        offset += sizeof(appdata_id);
+        pdb.frame_counter = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdb.frame_counter);
+
+        pdb.matrix_counter = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdb.matrix_counter);
+
+        pdb.range_idx = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdb.range_idx);
+
+        pdb.range_bins = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdb.range_bins);
+
+        pdb.frequency_count = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdb.frequency_count);
+
+        pdb.pulsedoppler_instance = bytes_to_uint32(&data[offset]);
+        offset += sizeof(pdb.pulsedoppler_instance);
+
+        pdb.byte_step_start = bytes_to_float(&data[offset]);
+        offset += sizeof(pdb.byte_step_start);
+
+        pdb.byte_step_size = bytes_to_float(&data[offset]);
+        offset += sizeof(pdb.byte_step_size);
+
+        pdb.fps = bytes_to_float(&data[offset]);
+        offset += sizeof(pdb.fps);
+
+        pdb.fps_decimated = bytes_to_float(&data[offset]);
+        offset += sizeof(pdb.fps_decimated);
+
+        pdb.frequency_start = bytes_to_float(&data[offset]);
+        offset += sizeof(pdb.frequency_start);
+
+        pdb.frequency_step = bytes_to_float(&data[offset]);
+        offset += sizeof(pdb.frequency_step);
+
+        pdb.range = bytes_to_float(&data[offset]);
+        offset += sizeof(pdb.range);
+
+        if (length != offset + pdb.frequency_count)
+        {
+            parser->error(ERROR_SHORT_DATA, user_data);
+            return ERROR_SHORT_DATA;
+        }
+
+        pdb.data = (const uint8_t *)(&data[offset]);
+
+        parser->pulsedoppler_byte(pdb, user_data);
+        return PARSE_OK;
     }
 
     int parse(HostParser *parser, const unsigned char *data, unsigned int length, void *user_data)
