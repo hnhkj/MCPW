@@ -27,6 +27,7 @@ void mcpw_on_host_parser_reply(Reply reply, void *user_data);
 //void mcpw_on_host_parser_system_status(SystemStatus ss, void * user_data);
 //void mcpw_on_host_parser_respiration_movinglist(RespirationMovingListData data, void * user_data);
 //void mcpw_on_host_parser_respiration_detectionlist(RespirationDetectionListData data, void * user_data);
+//void mcpw_on_host_parser_vitalsigns(VitalSignsData data, void * user_data);
 
 void mcpw_on_host_parser_ack(Ack ack, void *user_data)
 {

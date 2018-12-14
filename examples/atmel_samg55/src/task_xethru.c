@@ -87,6 +87,7 @@ void mcpw_on_host_parser_respiration_moving_list(RespirationMovingListData data,
 void mcpw_on_host_parser_presence_single(PresenceSingleData data, void * user_data); // Data parsed: PresenceSingle message
 void mcpw_on_host_parser_presence_moving_list(PresenceMovingListData data, void * user_data); // Data parsed: Presence MovingList message
 void mcpw_on_host_parser_baseband_ap(BasebandApData data, void * user_data); // Data parsed: Baseband AP
+void mcpw_on_host_parser_vitalsigns(VitalSignsData data, void * user_data); // Data parsed: VitalSigns
 
 
 bool mcpw_send_bytes(void *mcpw_void)
@@ -220,6 +221,23 @@ void mcpw_on_host_parser_baseband_ap(BasebandApData data, void * user_data)
 	printf(", NumBins=%d", data.num_bins);
 	printf(", Fc="); printf_float(data.carrier_frequency);
 	printf(", Fs="); printf_float(data.sample_frequency);
+	printf("\n");
+}
+
+void mcpw_on_host_parser_vitalsigns(VitalSignsData data, void * user_data)
+{
+	printf("VitalSigns: Counter=%d", data.frame_counter);
+	printf(", SensorState=%d", data.sensor_state);
+	printf(", RespirationRate="); printf_float(data.respiration_rate);
+	printf(", RespirationDistance="); printf_float(data.respiration_distance);
+	printf(", RespirationConfidence="); printf_float(data.respiration_confidence);
+	printf(", HeartRate="); printf_float(data.heart_rate);
+	printf(", HeartDistance="); printf_float(data.heart_distance);
+	printf(", HeartConfidence="); printf_float(data.heart_confidence);
+	printf(", NormalizedMovementSlow="); printf_float(data.normalized_movement_slow);
+	printf(", NormalizedMovementFast="); printf_float(data.normalized_movement_fast);
+	printf(", NormalizedMovementStart="); printf_float(data.normalized_movement_start);
+	printf(", NormalizedMovementEnd="); printf_float(data.normalized_movement_end);
 	printf("\n");
 }
 
@@ -403,8 +421,8 @@ int mcpw_demo_x4m300()
 	// Wait indefinately for readThread to finish.
 	for (;;)
 	{
-		// Every 3 minutes, store noisemap.
-		vTaskDelay(3*60*1000UL / portTICK_RATE_MS);
+		// Every 12 hours, store noisemap.
+		vTaskDelay(12*60*60*1000UL / portTICK_RATE_MS);
 		res = mcpw_store_noisemap(mcpw);
 		printf("Store noisemap %s.\n", (res == MCPW_OK ? "succeeded" : "failed"));
 	}
@@ -421,6 +439,7 @@ int mcpw_demo_x4m200()
 	mcpw->mcp_host_parser->respiration = mcpw_on_host_parser_respiration; // X4M200 legacy respiration message (original X2M200 resp message)
 	mcpw->mcp_host_parser->respiration_movinglist = mcpw_on_host_parser_respiration_moving_list; // X4M200 movinglist message
 	mcpw->mcp_host_parser->baseband_ap = mcpw_on_host_parser_baseband_ap; // X4M200 baseband AP message
+    mcpw->mcp_host_parser->vitalsigns = mcpw_on_host_parser_vitalsigns; // X4M200 vitalsigns message
 
 	// X4M200 Respiration profile
 	int res = 0;
@@ -450,14 +469,15 @@ int mcpw_demo_x4m200()
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_RESP_STATUS, XTID_OUTPUT_CONTROL_DISABLE)) printf("mcpw_set_output_control(XTS_ID_RESP_STATUS) failed.\n");
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_RESPIRATION_MOVINGLIST, XTID_OUTPUT_CONTROL_DISABLE)) printf("mcpw_set_output_control(XTS_ID_RESPIRATION_MOVINGLIST) failed.\n");
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_BASEBAND_AMPLITUDE_PHASE, XTID_OUTPUT_CONTROL_DISABLE)) printf("mcpw_set_output_control(XTS_ID_BASEBAND_AMPLITUDE_PHASE) failed.\n");
+	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_VITAL_SIGNS, XTID_OUTPUT_CONTROL_ENABLE)) printf("mcpw_set_output_control(XTS_ID_VITAL_SIGNS) failed.\n");
 	// Start module execution.
 	if (MCPW_OK != mcpw_set_sensor_mode(mcpw, XTS_SM_RUN, 0)) printf("mcpw_set_sensor_mode failed.\n");
 
 	// Wait indefinately for readThread to finish.
 	for (;;)
 	{
-		// Every 3 minutes, store noisemap.
-		vTaskDelay(3*60*1000UL / portTICK_RATE_MS);
+		// Every 12 hours, store noisemap.
+		vTaskDelay(12*60*60*1000UL / portTICK_RATE_MS);
 		res = mcpw_store_noisemap(mcpw);
 		printf("Store noisemap %s.\n", (res == MCPW_OK ? "succeeded" : "failed"));
 	}

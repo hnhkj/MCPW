@@ -11,7 +11,7 @@
 #define MCPW_ERROR 1
 #define MCPW_ERROR_TIMEOUT 2
 
-#define MCPW_VERSION_STRING "1.3.0"
+#define MCPW_VERSION_STRING "1.4.0"
 
 #define MCPW_RX_BUFFER_LENGTH 1024 * 7 // Short, processed messages: 200. Baseband data: 7000.
 #define MCPW_TX_BUFFER_LENGTH 640	  // No FW upgrade: 100, FW Upgrade: 640

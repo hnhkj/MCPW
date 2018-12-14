@@ -2,6 +2,6 @@
 *.o
 *.d
 *.bin
-
+*.exe
 # Whitelist some files
 
