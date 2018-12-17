@@ -776,6 +776,11 @@ extern "C"
         {
             return parse_presence_movinglist(parser, data, length, user_data);
         }
+        if (appdata_id == XTS_ID_RESPIRATION_DETECTIONLIST)
+        {
+
+            return parse_respiration_detectionlist(parser, data, length, user_data);
+        }
         if (appdata_id == XTS_ID_RESPIRATION_MOVINGLIST)
         {
             return parse_respiration_movinglist(parser, data, length, user_data);
