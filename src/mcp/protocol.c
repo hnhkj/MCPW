@@ -714,6 +714,22 @@ extern "C"
         return 0;
     }
 
+    int createSetApplicationUserZoneCommand(
+        float start,
+        float end,
+        AppendCallback callback,
+        void *user_data)
+    {
+        packet_start(callback, user_data);
+        process_byte(XTS_SPC_APPCOMMAND, callback, user_data);
+        process_byte(XTS_SPCA_SET, callback, user_data);
+        process_int(XTS_ID_APPLICATION_USER_ZONE, callback, user_data);
+        process_float(start, callback, user_data);
+        process_float(end, callback, user_data);
+        packet_end(callback, user_data);
+        return 0;
+    }
+
     int createSetSensitivityCommand(
         const uint32_t sensitivity,
         AppendCallback callback,

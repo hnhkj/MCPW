@@ -29,6 +29,8 @@ extern "C"
     typedef void (*McpLoadProfileCallback)(uint32_t profileid, void *user_data);
     typedef void (*McpProfileSetDetectionZoneCallback)(float start, float end, void *user_data);
     typedef void (*McpProfileGetDetectionZoneCallback)(void *user_data);
+    typedef void (*McpProfileSetApplicationUserZoneCallback)(float start, float end, void *user_data);
+    typedef void (*McpProfileGetApplicationUserZoneCallback)(void *user_data);
     typedef void (*McpProfileGetDetectionZoneLimitsCallback)(void *user_data);
     typedef void (*McpProfileSetSensitivityCallback)(uint32_t sensitivity, void *user_data);
     typedef void (*McpProfileGetSensitivityCallback)(void *user_data);
@@ -169,6 +171,8 @@ extern "C"
         McpGetProfileIdCallback onMcpGetProfileId;
         McpProfileSetDetectionZoneCallback onMcpProfileSetDetectionZone;
         McpProfileGetDetectionZoneCallback onMcpProfileGetDetectionZone;
+        McpProfileSetApplicationUserZoneCallback onMcpProfileSetApplicationUserZone;
+        McpProfileGetApplicationUserZoneCallback onMcpProfileGetApplicationUserZone;
         McpProfileGetDetectionZoneLimitsCallback onMcpProfileGetDetectionZoneLimits;
         McpProfileSetSensitivityCallback onMcpProfileSetSensitivity;
         McpProfileGetSensitivityCallback onMcpProfileGetSensitivity;

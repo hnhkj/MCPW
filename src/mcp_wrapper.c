@@ -83,8 +83,8 @@ bool mcpw_start_send(mcp_wrapper_t *mcpw)
 mcp_wrapper_t *mcpw_init(void *instance_memory)
 {
 	mcp_wrapper_t *mcpw = (mcp_wrapper_t *)instance_memory;
-	void *protocol_instance_memory = (int)(void *)mcpw + sizeof(mcp_wrapper_t); // Place protocol instance right after mcp_wrapper struct in already alocated memory provided.
-	void *mcp_host_parser_instance_memory = (int)(void *)protocol_instance_memory + getInstanceSize();
+	void *protocol_instance_memory = (void *)((char *)mcpw + sizeof(mcp_wrapper_t)); // Place protocol instance right after mcp_wrapper struct in already alocated memory provided.
+	void *mcp_host_parser_instance_memory = (void *)((char *)protocol_instance_memory + getInstanceSize());
 	mcpw->mcp = createApplicationProtocol(
 		&mcpw_mcp_handle_protocol_packet,
 		&mcpw_mcp_handle_protocol_error,
@@ -379,6 +379,26 @@ int mcpw_set_detection_zone(mcp_wrapper_t *mcpw, float start, float end)
 	return ret;
 }
 
+int mcpw_set_application_user_zone(mcp_wrapper_t *mcpw, float start, float end)
+{
+	if (!mcpw_start_send(mcpw))
+		return MCPW_ERROR;
+	if (!mcpw->send_bytes)
+		return MCPW_ERROR;
+	createSetApplicationUserZoneCommand(start, end, mcpw->on_mcp_messagebuild, (void *)mcpw);
+	mcpw->send_bytes(mcpw);
+	if (!mcpw->wait_for_response(mcpw->default_timeout))
+	{
+		mcpw->busy = false;
+		return MCPW_ERROR_TIMEOUT;
+	}
+	int ret = MCPW_ERROR;
+	if ((mcpw->sync_response_length == 1) && (mcpw->sync_response[0] == XTS_SPR_ACK))
+		ret = MCPW_OK;
+	mcpw->busy = false;
+	return ret;
+}
+
 int mcpw_set_led_control(mcp_wrapper_t *mcpw, uint8_t mode, uint8_t intensity)
 {
 	if (!mcpw_start_send(mcpw))
@@ -464,6 +484,85 @@ int mcpw_get_systeminfo(mcp_wrapper_t *mcpw, uint8_t info_code, char *result, ui
 	return ret;
 }
 
+int mcpw_get_detection_zone(mcp_wrapper_t *mcpw, float *start, float *end)
+{
+	if (!mcpw_start_send(mcpw))
+		return MCPW_ERROR;
+	if (!mcpw->send_bytes)
+		return MCPW_ERROR;
+	createGetDetectionZoneCommand(mcpw->on_mcp_messagebuild, (void *)mcpw);
+	mcpw->send_bytes(mcpw);
+	if (!mcpw->wait_for_response(mcpw->default_timeout))
+	{
+		mcpw->busy = false;
+		return MCPW_ERROR_TIMEOUT;
+	}
+	int ret = MCPW_ERROR;
+	if (mcpw->sync_response[0] == XTS_SPR_REPLY)
+	{
+		union {
+			float f[2];
+			char c[2 * sizeof(float)];
+		} x;
+
+		if (mcpw->reply.data_size * mcpw->reply.length >= sizeof(x.c))
+		{
+			memcpy(x.c, mcpw->reply.data, sizeof(x.c));
+			*start = x.f[0];
+			*end = x.f[1];
+			ret = MCPW_OK;
+		}
+	}
+	mcpw->busy = false;
+	return ret;
+}
+
+int mcpw_get_sensitivity(mcp_wrapper_t *mcpw, uint32_t *sensitivity)
+{
+	if (!mcpw_start_send(mcpw))
+		return MCPW_ERROR;
+	if (!mcpw->send_bytes)
+		return MCPW_ERROR;
+	createGetSensitivityCommand(mcpw->on_mcp_messagebuild, (void *)mcpw);
+	mcpw->send_bytes(mcpw);
+	if (!mcpw->wait_for_response(mcpw->default_timeout))
+	{
+		mcpw->busy = false;
+		return MCPW_ERROR_TIMEOUT;
+	}
+	int ret = MCPW_ERROR;
+	if (mcpw->sync_response[0] == XTS_SPR_REPLY)
+	{
+		memcpy(sensitivity, mcpw->reply.data, sizeof(uint32_t));
+		ret = MCPW_OK;
+	}
+	mcpw->busy = false;
+	return ret;
+}
+
+int mcpw_get_led_control(mcp_wrapper_t *mcpw, uint8_t *led_control)
+{
+	if (!mcpw_start_send(mcpw))
+		return MCPW_ERROR;
+	if (!mcpw->send_bytes)
+		return MCPW_ERROR;
+	createGetLedControlCommand(mcpw->on_mcp_messagebuild, (void *)mcpw);
+	mcpw->send_bytes(mcpw);
+	if (!mcpw->wait_for_response(mcpw->default_timeout))
+	{
+		mcpw->busy = false;
+		return MCPW_ERROR_TIMEOUT;
+	}
+	int ret = MCPW_ERROR;
+	if (mcpw->sync_response[0] == XTS_SPR_REPLY)
+	{
+		memcpy(led_control, mcpw->reply.data, sizeof(uint32_t));
+		ret = MCPW_OK;
+	}
+	mcpw->busy = false;
+	return ret;
+}
+
 int mcpw_store_noisemap(mcp_wrapper_t *mcpw)
 {
 	if (!mcpw_start_send(mcpw))
@@ -511,6 +610,26 @@ int mcpw_set_baudrate(mcp_wrapper_t *mcpw, uint32_t baudrate)
 	if (!mcpw->send_bytes)
 		return MCPW_ERROR;
 	createSetBaudRateCommand(baudrate, mcpw->on_mcp_messagebuild, (void *)mcpw);
+	mcpw->send_bytes(mcpw);
+	if (!mcpw->wait_for_response(mcpw->default_timeout))
+	{
+		mcpw->busy = false;
+		return MCPW_ERROR_TIMEOUT;
+	}
+	int ret = MCPW_ERROR;
+	if ((mcpw->sync_response_length == 1) && (mcpw->sync_response[0] == XTS_SPR_ACK))
+		ret = MCPW_OK;
+	mcpw->busy = false;
+	return ret;
+}
+
+int mcpw_system_run_test(mcp_wrapper_t *mcpw, uint8_t testcode)
+{
+	if (!mcpw_start_send(mcpw))
+		return MCPW_ERROR;
+	if (!mcpw->send_bytes)
+		return MCPW_ERROR;
+	createSystemRunTest(testcode, mcpw->on_mcp_messagebuild, (void *)mcpw);
 	mcpw->send_bytes(mcpw);
 	if (!mcpw->wait_for_response(mcpw->default_timeout))
 	{

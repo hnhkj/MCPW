@@ -71,14 +71,19 @@ extern "C"
 	int mcpw_set_sensor_mode(mcp_wrapper_t *mcpw, uint8_t mode, uint8_t param);
 	int mcpw_set_sensitivity(mcp_wrapper_t *mcpw, uint32_t sensitivity);
 	int mcpw_set_detection_zone(mcp_wrapper_t *mcpw, float start, float end);
+	int mcpw_set_application_user_zone(mcp_wrapper_t *mcpw, float start, float end);
 	int mcpw_set_led_control(mcp_wrapper_t *mcpw, uint8_t mode, uint8_t intensity);
 	int mcpw_set_output_control(mcp_wrapper_t *mcpw, uint32_t output_feature, uint32_t output_control);
 	int mcpw_set_parameter_file(mcp_wrapper_t *mcpw, uint32_t filename_length, uint32_t data_length, const char *filename, const char *data);
 	int mcpw_get_systeminfo(mcp_wrapper_t *mcpw, uint8_t info_code, char *result, uint32_t max_length);
+	int mcpw_get_detection_zone(mcp_wrapper_t *mcpw, float *, float *);
+	int mcpw_get_sensitivity(mcp_wrapper_t *mcpw, uint32_t *);
+	int mcpw_get_led_control(mcp_wrapper_t *mcpw, uint8_t *);
 
 	int mcpw_store_noisemap(mcp_wrapper_t *mcpw);
 	int mcpw_set_noisemap_control(mcp_wrapper_t *mcpw, uint32_t noisemap_control);
 	int mcpw_set_baudrate(mcp_wrapper_t *mcpw, uint32_t baudrate);
+	int mcpw_system_run_test(mcp_wrapper_t *mcpw, uint8_t testcode);
 	int mcpw_reset_to_factory_preset(mcp_wrapper_t *mcpw);
 
 	/* Special non-documented methods */

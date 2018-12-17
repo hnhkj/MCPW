@@ -776,7 +776,14 @@ extern "C"
         {
             return parse_presence_movinglist(parser, data, length, user_data);
         }
-
+        if (appdata_id == XTS_ID_RESPIRATION_MOVINGLIST)
+        {
+            return parse_respiration_movinglist(parser, data, length, user_data);
+        }
+        if (appdata_id == XTS_ID_RESPIRATION_NORMALIZEDMOVEMENTLIST)
+        {
+            return parse_respiration_normalizedmovementlist(parser, data, length, user_data);
+        }
         return PARSE_OK;
     }
 
@@ -1119,6 +1126,10 @@ extern "C"
         else if (data[offset] == XTS_SPR_PONG)
         {
             return parse_pong(parser, data, length, user_data);
+        }
+        else if (data[offset] == XTS_SPR_REPLY)
+        {
+            return parse_reply(parser, data, length, user_data);
         }
         else if (data[offset] == XTS_SPR_DATA)
         {

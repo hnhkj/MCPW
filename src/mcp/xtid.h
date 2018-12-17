@@ -23,6 +23,7 @@ extern "C"
 
 // Profile data and feature IDs
 #define XTS_ID_DETECTION_ZONE 0x96a10a1c
+#define XTS_ID_APPLICATION_USER_ZONE 0xa53695bb
 #define XTS_ID_DETECTION_ZONE_LIMITS 0x96a10a1d
 #define XTS_ID_SENSITIVITY 0x10a5112b
 #define XTS_ID_PRESENCE_STATUS 0x991a52be
