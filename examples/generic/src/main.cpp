@@ -362,9 +362,6 @@ int mcpw_demo_x4m200(char *com_port)
 
 	if (MCPW_OK != mcpw_load_profile(mcpw, XTS_ID_APP_RESPIRATION_4))
 		cout << "mcpw_load_profile failed." << endl;
-
-	if (MCPW_OK != mcpw_set_led_control(mcpw, XTID_LED_MODE_FULL, 100))
-		cout << "mcpw_set_led_control failed." << endl;
 	if (MCPW_OK != mcpw_set_led_control(mcpw, XTID_LED_MODE_FULL, 100))
 		cout << "mcpw_set_led_control failed." << endl;
 	if (MCPW_OK != mcpw_set_noisemap_control(mcpw, 6))
@@ -375,7 +372,7 @@ int mcpw_demo_x4m200(char *com_port)
 		cout << "mcpw_set_sensitivity failed." << endl;
 	// Read module info
 	char system_info[256] = "";
-	int status = mcpw_get_systeminfo(mcpw, XTID_SSIC_VERSION, system_info, sizeof(system_info));
+	int status = mcpw_get_systeminfo(mcpw, XTID_SSIC_FIRMWAREID, system_info, sizeof(system_info));
 	if (MCPW_OK == status)
 	{
 		cout << "XTID_SSIC_FIRMWAREID: " << system_info << endl;
@@ -407,7 +404,24 @@ int mcpw_demo_x4m200(char *com_port)
 	{
 		cout << "mcpw_get_sensitivity failed." << endl;
 	}
-
+	uint32_t profileid;
+	if (MCPW_OK == mcpw_get_profileid(mcpw, &profileid))
+	{
+		printf("profileid: %d\n", profileid);
+	}
+	else
+	{
+		cout << "mcpw_get_profileid failed." << endl;
+	}
+	uint32_t noisemap_control;
+	if (MCPW_OK == mcpw_get_noisemap_control(mcpw, &noisemap_control))
+	{
+		printf("noisemap_control: %d\n", noisemap_control);
+	}
+	else
+	{
+		cout << "mcpw_get_noisemap_control failed." << endl;
+	}
 	uint8_t led_control;
 	if (MCPW_OK == mcpw_get_led_control(mcpw, &led_control))
 	{

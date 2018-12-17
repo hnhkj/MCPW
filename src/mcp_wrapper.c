@@ -540,6 +540,52 @@ int mcpw_get_sensitivity(mcp_wrapper_t *mcpw, uint32_t *sensitivity)
 	return ret;
 }
 
+int mcpw_get_profileid(mcp_wrapper_t *mcpw, uint32_t *profileid)
+{
+	if (!mcpw_start_send(mcpw))
+		return MCPW_ERROR;
+	if (!mcpw->send_bytes)
+		return MCPW_ERROR;
+	createGetProfileIdCommand(mcpw->on_mcp_messagebuild, (void *)mcpw);
+	mcpw->send_bytes(mcpw);
+	if (!mcpw->wait_for_response(mcpw->default_timeout))
+	{
+		mcpw->busy = false;
+		return MCPW_ERROR_TIMEOUT;
+	}
+	int ret = MCPW_ERROR;
+	if (mcpw->sync_response[0] == XTS_SPR_REPLY)
+	{
+		memcpy(profileid, mcpw->reply.data, sizeof(uint32_t));
+		ret = MCPW_OK;
+	}
+	mcpw->busy = false;
+	return ret;
+}
+
+int mcpw_get_noisemap_control(mcp_wrapper_t *mcpw, uint32_t *noisemap_control)
+{
+	if (!mcpw_start_send(mcpw))
+		return MCPW_ERROR;
+	if (!mcpw->send_bytes)
+		return MCPW_ERROR;
+	createGetNoiseMapControlCommand(mcpw->on_mcp_messagebuild, (void *)mcpw);
+	mcpw->send_bytes(mcpw);
+	if (!mcpw->wait_for_response(mcpw->default_timeout))
+	{
+		mcpw->busy = false;
+		return MCPW_ERROR_TIMEOUT;
+	}
+	int ret = MCPW_ERROR;
+	if (mcpw->sync_response[0] == XTS_SPR_REPLY)
+	{
+		memcpy(noisemap_control, mcpw->reply.data, sizeof(uint32_t));
+		ret = MCPW_OK;
+	}
+	mcpw->busy = false;
+	return ret;
+}
+
 int mcpw_get_led_control(mcp_wrapper_t *mcpw, uint8_t *led_control)
 {
 	if (!mcpw_start_send(mcpw))

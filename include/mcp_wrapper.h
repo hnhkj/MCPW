@@ -77,6 +77,8 @@ extern "C"
 	int mcpw_get_detection_zone(mcp_wrapper_t *mcpw, float *, float *);
 	int mcpw_get_sensitivity(mcp_wrapper_t *mcpw, uint32_t *);
 	int mcpw_get_led_control(mcp_wrapper_t *mcpw, uint8_t *);
+	int mcpw_get_profileid(mcp_wrapper_t *mcpw, uint32_t *);
+	int mcpw_get_noisemap_control(mcp_wrapper_t *mcpw, uint32_t *);
 
 	int mcpw_store_noisemap(mcp_wrapper_t *mcpw);
 	int mcpw_set_noisemap_control(mcp_wrapper_t *mcpw, uint32_t noisemap_control);
