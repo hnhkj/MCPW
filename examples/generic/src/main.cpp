@@ -321,11 +321,11 @@ int mcpw_demo_x4m200(char *com_port)
 	mcpw->wait_for_response = mcpw_wait_for_response;
 	mcpw->response_ready = mcpw_response_ready;
 	mcpw->delay = mcpw_delay;
-	mcpw->mcp_host_parser->sleep = mcpw_on_host_parser_sleep;														   // X4M200 sleep message
-	mcpw->mcp_host_parser->respiration = mcpw_on_host_parser_respiration;											   // X4M200 legacy respiration message (original X2M200 resp message)
-	mcpw->mcp_host_parser->respiration_movinglist = mcpw_on_host_parser_respiration_moving_list;					   // X4M200 movinglist message
-	mcpw->mcp_host_parser->respiration_normalized_movinglist = mcpw_on_host_parser_respiration_normalized_moving_list; // X4M200 normalized movinglist message
-	mcpw->mcp_host_parser->baseband_ap = mcpw_on_host_parser_baseband_ap;											   // X4M200 baseband AP message
+	mcpw->mcp_host_parser->sleep = mcpw_on_host_parser_sleep;															// X4M200 sleep message
+	mcpw->mcp_host_parser->respiration = mcpw_on_host_parser_respiration;												// X4M200 legacy respiration message (original X2M200 resp message)
+	mcpw->mcp_host_parser->respiration_movinglist = mcpw_on_host_parser_respiration_moving_list;						// X4M200 movinglist message
+	mcpw->mcp_host_parser->respiration_normalizedmovementlist = mcpw_on_host_parser_respiration_normalized_moving_list; // X4M200 normalized movinglist message
+	mcpw->mcp_host_parser->baseband_ap = mcpw_on_host_parser_baseband_ap;												// X4M200 baseband AP message
 	mcpw->user_reference = (void *)moduleIo;
 
 	cout << "Starting serial port read thread." << endl;
