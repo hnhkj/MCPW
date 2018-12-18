@@ -84,12 +84,14 @@ extern "C"
         float end,
         AppendCallback callback,
         void *user_data);
-
-    int createSetSensitivityCommand(
-        const uint32_t sensitivity,
+    int createSetApplicationUserZoneCommand(
+        float start,
+        float end,
         AppendCallback callback,
         void *user_data);
-
+    int createSetSensitivityCommand(const uint32_t sensitivity,
+                                    AppendCallback callback,
+                                    void *user_data);
     int createGetSensitivityCommand(
         AppendCallback callback,
         void *user_data);
