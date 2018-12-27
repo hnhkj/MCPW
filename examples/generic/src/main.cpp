@@ -407,7 +407,10 @@ int mcpw_demo_x4m200(char *com_port)
 	moduleIo->setBaudrate(XTID_BAUDRATE_921600);
 #endif
 	mcpw_set_sensor_mode(mcpw, XTS_SM_STOP, 0);
-	if (MCPW_OK != mcpw_load_profile(mcpw, XTS_ID_APP_RESPIRATION_4))
+	// XTS_ID_APP_HEARTRATE profile only works for X4M210
+	//if (MCPW_OK != mcpw_load_profile(mcpw, XTS_ID_APP_HEARTRATE))
+	//	cout << "mcpw_load_profile failed." << endl;
+	if (MCPW_OK != mcpw_load_profile(mcpw, XTS_ID_APP_RESPIRATION_2))
 		cout << "mcpw_load_profile failed." << endl;
 	if (MCPW_OK != mcpw_set_led_control(mcpw, XTID_LED_MODE_FULL, 100))
 		cout << "mcpw_set_led_control failed." << endl;
