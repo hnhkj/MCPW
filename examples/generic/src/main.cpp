@@ -249,9 +249,7 @@ int mcpw_demo_x4m300(char *com_port)
 		cout << "Error opening " << com_port << ". Aborting." << endl;
 		return -1;
 	}
-
 	cout << "Connecting to XeThru module on " << com_port << "." << endl;
-
 	// Configure MCPW.
 	uint32_t mcpw_instance_memory_size = mcpw_get_instance_size();
 	void *mcpw_instance_memory = malloc(mcpw_instance_memory_size);
@@ -264,10 +262,8 @@ int mcpw_demo_x4m300(char *com_port)
 	mcpw->mcp_host_parser->presence_movinglist = mcpw_on_host_parser_presence_moving_list; // X4M300 presence movinglist message
 	mcpw->mcp_host_parser->baseband_ap = mcpw_on_host_parser_baseband_ap;				   // X4M300 baseband AP message
 	mcpw->user_reference = (void *)moduleIo;
-
 	cout << "Starting serial port read thread." << endl;
 	std::thread readThread(readThreadMethod, mcpw);
-
 	// X4M300 Presence profile
 	int res = 0;
 	// First stop any running profile and change baudrate.
@@ -280,14 +276,75 @@ int mcpw_demo_x4m300(char *com_port)
 	mcpw_set_sensor_mode(mcpw, XTS_SM_STOP, 0);
 	if (MCPW_OK != mcpw_load_profile(mcpw, XTS_ID_APP_PRESENCE_2))
 		cout << "mcpw_load_profile failed." << endl;
-	if (MCPW_OK != mcpw_set_noisemap_control(mcpw, XTID_NOISEMAP_CONTROL_ENABLE | XTID_NOISEMAP_CONTROL_ADAPTIVE))
-		cout << "mcpw_set_noisemap_control failed." << endl;
-	if (MCPW_OK != mcpw_set_detection_zone(mcpw, 1.0, 3.0))
-		cout << "mcpw_set_detection_zone failed." << endl;
-	if (MCPW_OK != mcpw_set_sensitivity(mcpw, 9))
-		cout << "mcpw_set_sensitivity failed." << endl;
 	if (MCPW_OK != mcpw_set_led_control(mcpw, XTID_LED_MODE_FULL, 100))
 		cout << "mcpw_set_led_control failed." << endl;
+	if (MCPW_OK != mcpw_set_noisemap_control(mcpw, 6))
+		cout << "mcpw_set_noisemap_control failed." << endl;
+	if (MCPW_OK != mcpw_set_detection_zone(mcpw, 0.5, 3))
+		cout << "mcpw_set_detection_zone failed." << endl;
+	if (MCPW_OK != mcpw_set_sensitivity(mcpw, 5))
+		cout << "mcpw_set_sensitivity failed." << endl;
+	// Read module info
+	char system_info[256] = "";
+	int status = mcpw_get_systeminfo(mcpw, XTID_SSIC_FIRMWAREID, system_info, sizeof(system_info));
+	if (MCPW_OK == status)
+	{
+		cout << "XTID_SSIC_FIRMWAREID: " << system_info << endl;
+	}
+	else
+		cout << "mcpw_get_systeminfo failed:" << status << endl;
+	if (MCPW_OK == mcpw_get_systeminfo(mcpw, XTID_SSIC_VERSION, system_info, sizeof(system_info)))
+	{
+		cout << "XTID_SSIC_VERSION: " << system_info << endl;
+	}
+	else
+		cout << "mcpw_get_systeminfo failed." << endl;
+
+	float start, end;
+	if (MCPW_OK == mcpw_get_detection_zone(mcpw, &start, &end))
+	{
+		printf("Detection zone: %f, %f\n", start, end);
+	}
+	else
+	{
+		cout << "mcpw_set_detection_zone failed." << endl;
+	}
+	uint32_t sensitivity;
+	if (MCPW_OK == mcpw_get_sensitivity(mcpw, &sensitivity))
+	{
+		printf("Sensitivity: %d\n", sensitivity);
+	}
+	else
+	{
+		cout << "mcpw_get_sensitivity failed." << endl;
+	}
+	uint32_t profileid;
+	if (MCPW_OK == mcpw_get_profileid(mcpw, &profileid))
+	{
+		printf("profileid: %d\n", profileid);
+	}
+	else
+	{
+		cout << "mcpw_get_profileid failed." << endl;
+	}
+	uint32_t noisemap_control;
+	if (MCPW_OK == mcpw_get_noisemap_control(mcpw, &noisemap_control))
+	{
+		printf("noisemap_control: %d\n", noisemap_control);
+	}
+	else
+	{
+		cout << "mcpw_get_noisemap_control failed." << endl;
+	}
+	uint8_t led_control;
+	if (MCPW_OK == mcpw_get_led_control(mcpw, &led_control))
+	{
+		printf("led_control: %d\n", led_control);
+	}
+	else
+	{
+		cout << "mcpw_get_led_control failed." << endl;
+	}
 	// Methods to turn on or off module data messages. Select _ENABLE or _DISABLE.
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_PRESENCE_SINGLE, XTID_OUTPUT_CONTROL_ENABLE))
 		cout << "mcpw_set_output_control(XTS_ID_PRESENCE_SINGLE) failed." << endl;
@@ -298,7 +355,6 @@ int mcpw_demo_x4m300(char *com_port)
 	// Start module execution.
 	if (MCPW_OK != mcpw_set_sensor_mode(mcpw, XTS_SM_RUN, 0))
 		cout << "mcpw_set_sensor_mode failed." << endl;
-
 	// Wait indefinately for readThread to finish.
 	for (;;)
 	{
@@ -308,28 +364,22 @@ int mcpw_demo_x4m300(char *com_port)
 		cout << "Store noisemap " << (res == MCPW_OK ? "succeeded" : "failed") << "." << endl;
 	}
 	readThread.join();
-
 	delete moduleIo;
 	moduleIo = NULL;
-
 	free(mcpw_instance_memory);
-
 	return 0;
 }
 
 int mcpw_demo_x4m200(char *com_port)
 {
 	cout << "Starting mcpw_demo_x4m200." << endl;
-
 	ModuleIo *moduleIo = createModuleIo();
 	if (0 != moduleIo->open(com_port))
 	{
 		cout << "Error opening " << com_port << ". Aborting." << endl;
 		return -1;
 	}
-
 	cout << "Connecting to XeThru module on " << com_port << "." << endl;
-
 	// Configure MCPW.
 	uint32_t mcpw_instance_memory_size = mcpw_get_instance_size();
 	void *mcpw_instance_memory = malloc(mcpw_instance_memory_size);
@@ -345,10 +395,8 @@ int mcpw_demo_x4m200(char *com_port)
 	mcpw->mcp_host_parser->baseband_ap = mcpw_on_host_parser_baseband_ap;												// X4M200 baseband AP message
 	mcpw->mcp_host_parser->vitalsigns = mcpw_on_host_parser_vitalsigns;													// X4M200 vitalsigns message
 	mcpw->user_reference = (void *)moduleIo;
-
 	cout << "Starting serial port read thread." << endl;
 	std::thread readThread(readThreadMethod, mcpw);
-
 	// X4M200 Respiration profile
 	int res = 0;
 	// First stop any running profile and change baudrate.
@@ -359,7 +407,6 @@ int mcpw_demo_x4m200(char *com_port)
 	moduleIo->setBaudrate(XTID_BAUDRATE_921600);
 #endif
 	mcpw_set_sensor_mode(mcpw, XTS_SM_STOP, 0);
-
 	if (MCPW_OK != mcpw_load_profile(mcpw, XTS_ID_APP_RESPIRATION_4))
 		cout << "mcpw_load_profile failed." << endl;
 	if (MCPW_OK != mcpw_set_led_control(mcpw, XTID_LED_MODE_FULL, 100))
@@ -431,7 +478,6 @@ int mcpw_demo_x4m200(char *com_port)
 	{
 		cout << "mcpw_get_led_control failed." << endl;
 	}
-
 	// Methods to turn on or off module data messages. Select _ENABLE or _DISABLE.
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_RESP_STATUS, XTID_OUTPUT_CONTROL_DISABLE))
 		cout << "mcpw_set_output_control(XTS_ID_RESP_STATUS) failed." << endl;
@@ -456,26 +502,21 @@ int mcpw_demo_x4m200(char *com_port)
 		cout << "Store noisemap " << (res == MCPW_OK ? "succeeded" : "failed") << "." << endl;
 	}
 	readThread.join();
-
 	delete moduleIo;
 	moduleIo = NULL;
-
 	free(mcpw_instance_memory);
-
 	return 0;
 }
 
-int mcpw_demo_x4m200_test(char *com_port, uint8_t testcode)
+int mcpw_demo_set_verification_mode(char *com_port, uint8_t testcode)
 {
 	cout << "Starting mcpw_demo_x4m200." << endl;
-
 	ModuleIo *moduleIo = createModuleIo();
 	if (0 != moduleIo->open(com_port))
 	{
 		cout << "Error opening " << com_port << ". Aborting." << endl;
 		return -1;
 	}
-
 	cout << "Connecting to XeThru module on " << com_port << "." << endl;
 
 	// Configure MCPW.
@@ -486,20 +527,15 @@ int mcpw_demo_x4m200_test(char *com_port, uint8_t testcode)
 	mcpw->wait_for_response = mcpw_wait_for_response;
 	mcpw->response_ready = mcpw_response_ready;
 	mcpw->delay = mcpw_delay;
-	mcpw->mcp_host_parser->sleep = mcpw_on_host_parser_sleep;									 // X4M200 sleep message
-	mcpw->mcp_host_parser->respiration = mcpw_on_host_parser_respiration;						 // X4M200 legacy respiration message (original X2M200 resp message)
-	mcpw->mcp_host_parser->respiration_movinglist = mcpw_on_host_parser_respiration_moving_list; // X4M200 movinglist message
-	mcpw->mcp_host_parser->baseband_ap = mcpw_on_host_parser_baseband_ap;						 // X4M200 baseband AP message
 	mcpw->user_reference = (void *)moduleIo;
-
 	cout << "Starting serial port read thread." << endl;
 	std::thread readThread(readThreadMethod, mcpw);
-
 	mcpw_set_sensor_mode(mcpw, XTS_SM_STOP, 0);
 	mcpw_system_run_test(mcpw, testcode);
-	cout << "test mode start!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+	cout << "Module is on certifcation mode now !!!" << endl;
 	while (1)
 		;
+	return 0;
 }
 
 int mcpw_demo_x2m200(char *com_port)
@@ -546,21 +582,16 @@ int mcpw_demo_x2m200(char *com_port)
 		return -1;
 	}
 	mcpw->user_reference = (void *)moduleIo;
-
 	cout << "Starting serial port read thread." << endl;
 	std::thread readThread(readThreadMethod, mcpw);
-
 	res |= mcpw_load_profile(mcpw, XTS_ID_APP_SLEEP);
 	res |= mcpw_set_detection_zone(mcpw, 0.4, 2.0);
 	res |= mcpw_set_sensitivity(mcpw, 5);
 	res |= mcpw_set_led_control(mcpw, XTID_LED_MODE_FULL, 100);
 	res |= mcpw_set_sensor_mode(mcpw, XTS_SM_RUN, 0);
-
 	readThread.join();
-
 	delete moduleIo;
 	moduleIo = NULL;
-
 	return 0;
 }
 
@@ -576,7 +607,6 @@ int mcpw_demo_upgrade_x4m300(char *com_port)
 	}
 
 	cout << "Connecting to XeThru module on " << com_port << "." << endl;
-
 	// Configure MCPW.
 	uint32_t mcpw_instance_memory_size = mcpw_get_instance_size();
 	void *mcpw_instance_memory = malloc(mcpw_instance_memory_size);
@@ -607,12 +637,9 @@ int mcpw_demo_upgrade_x4m300(char *com_port)
 
 	// Wait indefinately for readThread to finish.
 	readThread.join();
-
 	delete moduleIo;
 	moduleIo = NULL;
-
 	free(mcpw_instance_memory);
-
 	return 0;
 }
 
@@ -620,21 +647,10 @@ int main(int argc, char *argv[])
 {
 	if (argc < 1)
 	{
-		cout << "Add XeThru module serial port as parameter, e.g. COM1.";
+		cout << "Add XeThru module serial port as parameter, e.g. COM1, default device is X4M300, add 'X4M200' to run corresponding example" << endl;
 		return -1;
 	}
 	char *com_port = argv[1];
-
-	if ((argc == 4) && (strcmp(argv[2], "upgrade") == 0) && (strcmp(argv[3], "x4m300") == 0))
-	{
-		return mcpw_demo_upgrade_x4m300(com_port);
-	}
-
-	if ((argc == 3) && (strcmp(argv[2], "test") == 0))
-	{
-		return mcpw_demo_x4m200_test(com_port, 0x1F);
-	}
-
 	if (argc == 3)
 	{
 		std::string demo_to_run(argv[2]);
@@ -642,7 +658,15 @@ int main(int argc, char *argv[])
 			return mcpw_demo_x2m200(com_port);
 		else if ((demo_to_run == "x4m200") || (demo_to_run == "X4M200"))
 			return mcpw_demo_x4m200(com_port);
+		else if ((demo_to_run == "x4m300") || (demo_to_run == "X4M300"))
+			return mcpw_demo_x4m300(com_port);
+		else if ((argc == 3) && (strcmp(argv[2], "test") == 0))
+			// Input test mode: 0x1A: Enalbe Certification Mode, 0x1D: Tx Only, 0x1E: TX Digital Only, 0x1F: Stream TX Off,  0x1B: Disable Certification Mode.
+			return mcpw_demo_set_verification_mode(com_port, 0x1A);
 	}
-
-	return mcpw_demo_x4m300(com_port);
+	if ((argc == 4) && (strcmp(argv[2], "upgrade") == 0) && (strcmp(argv[3], "x4m300") == 0))
+	{
+		return mcpw_demo_upgrade_x4m300(com_port);
+	}
+	return 0;
 }
