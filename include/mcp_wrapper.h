@@ -94,8 +94,10 @@ extern "C"
 	int mcpw_x4driver_set_iterations(mcp_wrapper_t *mcpw, uint32_t iterations);
 	int mcpw_x4driver_set_downconversion(mcp_wrapper_t *mcpw, uint8_t downconversion);
 	int mcpw_x4driver_set_fps(mcp_wrapper_t *mcpw, float fps);
+	int mcpw_x4driver_set_frame_area_offset(mcp_wrapper_t *mcpw, float frame_area_offset);
 	int mcpw_x4driver_set_frame_area(mcp_wrapper_t *mcpw, float start, float end);
-
+	int mcpw_x4driver_set_tx_power(mcp_wrapper_t *mcpw, uint8_t tx_power);
+	int mcpw_x4driver_set_tx_center_frequency(mcp_wrapper_t *mcpw, uint8_t tx_center_frequency);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
