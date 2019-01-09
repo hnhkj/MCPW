@@ -8,5 +8,5 @@ steps:
 - task: PublishPipelineArtifact@0
   displayName: 'Publish Source Code'
   inputs:
-    artifactName: RadarScopeSrc
+    artifactName: MCPW
     targetPath: '$(Build.SourcesDirectory)'
