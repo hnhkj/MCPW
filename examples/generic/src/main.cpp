@@ -199,8 +199,9 @@ void mcpw_on_host_parser_data_float(FloatData data, void *user_data)
 	cout << ", Length=" << data.length;
 	cout << endl;
 
-	float radar_frame[80];
+	float radar_frame[1536];
 	uint32_t radar_frame_length_max = sizeof(radar_frame) / sizeof(float);
+	cout << ", Max_Length=" << radar_frame_length_max;
 	uint32_t radar_frame_length = data.length;
 	if (radar_frame_length > radar_frame_length_max)
 		radar_frame_length = radar_frame_length_max;
@@ -511,6 +512,103 @@ int mcpw_demo_x4m200(char *com_port)
 	return 0;
 }
 
+int mcpw_demo_xep(char *com_port)
+{
+	cout << "Starting mcpw_demo_xep." << endl;
+	ModuleIo *moduleIo = createModuleIo();
+	if (0 != moduleIo->open(com_port))
+	{
+		cout << "Error opening " << com_port << ". Aborting." << endl;
+		return -1;
+	}
+	cout << "Connecting to XeThru module on " << com_port << "." << endl;
+	// Configure MCPW.
+	uint32_t mcpw_instance_memory_size = mcpw_get_instance_size();
+	void *mcpw_instance_memory = malloc(mcpw_instance_memory_size);
+	mcp_wrapper_t *mcpw = mcpw_init(mcpw_instance_memory);
+	mcpw->send_bytes = mcpw_send_bytes;
+	mcpw->wait_for_response = mcpw_wait_for_response;
+	mcpw->response_ready = mcpw_response_ready;
+	mcpw->delay = mcpw_delay;
+	mcpw->mcp_host_parser->data_float = mcpw_on_host_parser_data_float; // radar raw data message, RF data(downconversion disabled), Baseband data(downconversion enabled)
+	mcpw->user_reference = (void *)moduleIo;
+	cout << "Starting serial port read thread." << endl;
+	std::thread readThread(readThreadMethod, mcpw);
+	// X4M200 Respiration profile
+	int res = 0;
+	// First stop any running profile and change baudrate.
+#if 1
+	// Assume 115kbps, stop and change baudrate. If already 921kbps, these will fail, but the next stop will work.
+	mcpw_set_sensor_mode(mcpw, XTS_SM_STOP, 0);
+	mcpw_set_baudrate(mcpw, XTID_BAUDRATE_921600);
+	moduleIo->setBaudrate(XTID_BAUDRATE_921600);
+#endif
+	cout << "Starting XEP configuration." << endl;
+	// Read module info
+	char system_info[256] = "";
+	int status = mcpw_get_systeminfo(mcpw, XTID_SSIC_FIRMWAREID, system_info, sizeof(system_info));
+	if (MCPW_OK == status)
+	{
+		cout << "XTID_SSIC_FIRMWAREID: " << system_info << endl;
+	}
+	else
+		cout << "mcpw_get_systeminfo failed:" << status << endl;
+	if (MCPW_OK == mcpw_get_systeminfo(mcpw, XTID_SSIC_VERSION, system_info, sizeof(system_info)))
+	{
+		cout << "XTID_SSIC_VERSION: " << system_info << endl;
+	}
+	else
+		cout << "mcpw_get_systeminfo failed." << endl;
+
+	mcpw_set_sensor_mode(mcpw, XTS_SM_MANUAL, 0); // enter XEP mode
+	uint8_t downconversion = 1;
+	uint32_t dac_min = 949;
+	uint32_t dac_max = 1100;
+	uint32_t pulsesperstep = 300;
+	uint32_t iterations = 16;
+	uint8_t tx_center_frequency = 3;
+	uint8_t tx_power = 2;
+	float frame_area_offset = 0.18;
+	float start = -0.5;
+	float end = 3;
+	float fps = 1;
+
+	if (MCPW_OK != mcpw_x4driver_set_downconversion(mcpw, downconversion))
+		cout << "mcpw_x4driver_set_downconversion failed." << endl;
+	if (MCPW_OK != mcpw_x4driver_set_dac_min(mcpw, dac_min))
+		cout << "mcpw_x4driver_set_dac_min failed." << endl;
+	if (MCPW_OK != mcpw_x4driver_set_dac_max(mcpw, dac_max))
+		cout << "mcpw_x4driver_set_dac_max failed." << endl;
+	if (MCPW_OK != mcpw_x4driver_set_tx_power(mcpw, tx_power))
+		cout << "mcpw_x4driver_set_tx_power failed." << endl;
+	if (MCPW_OK != mcpw_x4driver_set_tx_center_frequency(mcpw, tx_center_frequency))
+		cout << "mcpw_x4driver_set_tx_center_frequency failed." << endl;
+	if (MCPW_OK != mcpw_x4driver_set_pulses_per_step(mcpw, pulsesperstep))
+		cout << "mcpw_x4driver_set_pulses_per_step failed." << endl;
+	if (MCPW_OK != mcpw_x4driver_set_iterations(mcpw, iterations))
+		cout << "mcpw_x4driver_set_iterations failed." << endl;
+	if (MCPW_OK != mcpw_x4driver_set_frame_area_offset(mcpw, frame_area_offset))
+		cout << "mcpw_x4driver_set_frame_area_offset failed." << endl;
+	if (MCPW_OK != mcpw_x4driver_set_frame_area(mcpw, 0.5, 3))
+		cout << "mcpw_x4driver_set_frame_area failed." << endl;
+	// Start module execution.
+	cout << "Starting Radar raw data output" << endl;
+	if (MCPW_OK != mcpw_x4driver_set_fps(mcpw, fps))
+		cout << "mcpw_x4driver_set_fps failed." << endl;
+
+	// Wait indefinately for readThread to finish.
+	for (;;)
+	{
+	}
+	if (MCPW_OK != mcpw_x4driver_set_fps(mcpw, 0))
+		cout << "mcpw_x4driver_set_fps failed." << endl;
+	readThread.join();
+	delete moduleIo;
+	moduleIo = NULL;
+	free(mcpw_instance_memory);
+	return 0;
+}
+
 int mcpw_demo_set_verification_mode(char *com_port, uint8_t testcode)
 {
 	cout << "Starting mcpw_demo_x4m200." << endl;
@@ -663,6 +761,8 @@ int main(int argc, char *argv[])
 			return mcpw_demo_x4m200(com_port);
 		else if ((demo_to_run == "x4m300") || (demo_to_run == "X4M300"))
 			return mcpw_demo_x4m300(com_port);
+		else if ((demo_to_run == "xep") || (demo_to_run == "XEP"))
+			return mcpw_demo_xep(com_port);
 		else if ((argc == 3) && (strcmp(argv[2], "test") == 0))
 			// Input test mode: 0x1A: Enalbe Certification Mode, 0x1D: Tx Only, 0x1E: TX Digital Only, 0x1F: Stream TX Off,  0x1B: Disable Certification Mode.
 			return mcpw_demo_set_verification_mode(com_port, 0x1A);
