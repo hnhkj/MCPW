@@ -6,6 +6,9 @@ Open documentation: doc/output/html/index.xhtml
 
 # Changelog
 
+## 1.4.1
+- Added XEP example for radar raw data output
+
 ## 1.4.0
 - Added vitalsigns message support
 
