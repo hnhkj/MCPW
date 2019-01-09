@@ -5,7 +5,7 @@ trigger:
 queue:
   name: Hosted VS2017
 steps:
-- task: PublishBuildArtifact@1
+- task: PublishBuildArtifacts@1
   displayName: 'Publish Source Code'
   inputs:
     artifactName: MCPW
