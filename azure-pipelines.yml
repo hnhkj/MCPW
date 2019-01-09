@@ -5,8 +5,8 @@ trigger:
 queue:
   name: Hosted VS2017
 steps:
-- task: PublishPipelineArtifact@0
+- task: PublishBuildArtifact@0
   displayName: 'Publish Source Code'
   inputs:
     artifactName: MCPW
-    targetPath: '$(Build.SourcesDirectory)'
+    pathtoPublish: '$(Build.SourcesDirectory)' 
