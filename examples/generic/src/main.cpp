@@ -493,6 +493,12 @@ int mcpw_demo_x4m200(char *com_port)
 		cout << "mcpw_set_output_control(XTS_ID_VITAL_SIGNS) failed." << endl;
 	if (MCPW_OK != mcpw_set_output_control(mcpw, XTS_ID_BASEBAND_AMPLITUDE_PHASE, XTID_OUTPUT_CONTROL_DISABLE))
 		cout << "mcpw_set_output_control(XTS_ID_BASEBAND_AMPLITUDE_PHASE) failed." << endl;
+
+	if (MCPW_OK != mcpw_x4driver_set_pif_register(mcpw, 0x75, 0x30))
+		cout << "mcpw set TX power failed" << endl;
+	if (MCPW_OK != mcpw_x4driver_set_pif_register(mcpw, 0x65, 0x30)) 
+	    cout << "mcpw set TX frequency failed" << endl;
+
 	// Start module execution.
 	if (MCPW_OK != mcpw_set_sensor_mode(mcpw, XTS_SM_RUN, 0))
 		cout << "mcpw_set_sensor_mode failed." << endl;
